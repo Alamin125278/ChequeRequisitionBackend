@@ -1,0 +1,1 @@
+Scaffold-DbContext -Connection 'Data Source=localhost;Initial Catalog=ChequeBookRe;User Id=sa;Password=alamin1252;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;Trusted_Connection=False;' -Provider Microsoft.EntityFrameworkCore.SqlServer -OutputDir "Models/CRDB" -ContextDir "DbContexts" -Context "CRDBContext"  -Force

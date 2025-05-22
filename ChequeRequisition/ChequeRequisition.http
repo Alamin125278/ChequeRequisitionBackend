@@ -1,0 +1,20 @@
+﻿@EProcurementService_HostAddress = http://localhost:5022/api
+@Token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNodXZvLml0QGhhbWVlbWdyb3VwLmNvbSIsInN1YiI6ImY3ODM3ODEzLWRjMWYtNGE1YS1iYzk5LTViNjRmYjUyMTJiOSIsIm5hbWUiOiJzaHV2by5pdEBoYW1lZW1ncm91cC5jb20iLCJFbXBDb2RlIjoiMDAxNTQ4IiwiVXNlcklkIjoiZjc4Mzc4MTMtZGMxZi00YTVhLWJjOTktNWI2NGZiNTIxMmI5IiwibmJmIjoxNzMwOTg0MjQxLCJleHAiOjE3MzE1ODkwNDEsImlhdCI6MTczMDk4NDI0MSwiaXNzIjoiaGlzYW4tbWFzdGVyeS1hdXRoLWFwaSIsImF1ZCI6Imhpc2FuLW1hc3RlcnktY2xpZW50In0.bTEKwtKTBimpwDcxG-9V-esr4Og98XvKRXmPAZIhN5Y
+
+POST {{EProcurementService_HostAddress}}/user
+Content-Type: application/json
+Accept: application/json
+Authorization:Bearer {{Token}}
+
+{
+    "UserName": "RakibKhan",
+    "Email": "rakib@gmail.com",
+    "Password":"rakib@123"
+}
+
+
+###
+
+GET {{EProcurementService_HostAddress}}/users
+Accept: application/json
+Authorization:Bearer {{Token}}
