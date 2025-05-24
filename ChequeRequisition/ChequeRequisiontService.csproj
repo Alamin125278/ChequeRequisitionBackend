@@ -34,7 +34,6 @@
 
   <ItemGroup>
     <Folder Include="Core\Interfaces\Services\" />
-    <Folder Include="Endpoints\Requisition\CreateRequisition\" />
     <Folder Include="Models\" />
   </ItemGroup>
 
