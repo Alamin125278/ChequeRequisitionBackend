@@ -1,10 +1,13 @@
-﻿using ChequeRequisiontService.Core.Dto.User;
+﻿using ChequeRequisiontService.Core.Dto.Auth;
+using ChequeRequisiontService.Core.Dto.User;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
+using ChequeRequisiontService.Core.Interfaces.Services.Auth;
 using ChequeRequisiontService.Infrastructure.Repositories.BankRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.BranchRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.UserRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.VendorRepo;
+using ChequeRequisiontService.Infrastructure.Services.Auth;
 using Microsoft.AspNetCore.Identity;
 
 namespace ChequeRequisiontService.Extensions;
@@ -19,6 +22,10 @@ public static class DependencyContainer
         services.AddScoped<IBankRepo, BankRepo>();
         services.AddScoped<IBranchRepo, BranchRepo>();
         services.AddScoped<IRequisitonRepo, RequisitionRepo>();
+
+        services.AddScoped<IAuthenticationServices, AuthenticationServices>();
+
+        services.AddScoped<AuthenticatedUserInfo>();
 
     }
 }

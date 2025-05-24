@@ -71,6 +71,14 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
         return data?.Adapt<UserDto?>();
     }
 
+    public async Task<UserDto?> GetUserByEmailOrUserName(string UserNameOrEmail)
+    {
+        var data = await _cRDBContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserName == UserNameOrEmail || x.Email == UserNameOrEmail);
+        return data?.Adapt<UserDto?>();
+    }
+
     public async Task<UserDto> UpdateAsync(UserDto entity, int Id, int UserId, CancellationToken cancellationToken = default)
     {
         var data = await _cRDBContext.Users.FirstOrDefaultAsync(x => x.Id == Id);

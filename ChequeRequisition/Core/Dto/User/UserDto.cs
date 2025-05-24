@@ -1,6 +1,6 @@
 ﻿namespace ChequeRequisiontService.Core.Dto.User;
 
-public record UserDto
+public class UserDto
 {
     public int Id { get; set; }
 

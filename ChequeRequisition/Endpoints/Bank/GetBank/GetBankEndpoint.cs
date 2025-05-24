@@ -11,7 +11,7 @@ namespace ChequeRequisiontService.Endpoints.Bank.GetBank
             {
                 var result = await sender.Send(new GetBankQuery(id));
                 return result.Bank != null ? Results.Ok(result) : Results.NotFound();
-            });
+            }).RequireAuthorization();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.Bank;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -23,13 +24,13 @@ namespace ChequeRequisiontService.Endpoints.Bank.CreateBank
             RuleFor(x => x.BankAddress).NotEmpty().WithMessage("Address is required.");
         }
     }
-    public class CreateBankHandler(IBankRepo bankRepo):ICommandHandler<CreateBankCommand, CreateBankResult>
+    public class CreateBankHandler(IBankRepo bankRepo, AuthenticatedUserInfo authenticatedUserInfo):ICommandHandler<CreateBankCommand, CreateBankResult>
     {
         private readonly IBankRepo _bankRepo = bankRepo;
         public async Task<CreateBankResult> Handle(CreateBankCommand request, CancellationToken cancellationToken)
         {
             var bank = request.Adapt<BankDto>();
-            var createdBank = await _bankRepo.CreateAsync(bank, 1, cancellationToken);
+            var createdBank = await _bankRepo.CreateAsync(bank, authenticatedUserInfo.Id, cancellationToken);
             return new CreateBankResult(createdBank);
         }
     }

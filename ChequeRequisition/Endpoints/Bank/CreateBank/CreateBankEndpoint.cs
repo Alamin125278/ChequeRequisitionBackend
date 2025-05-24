@@ -15,7 +15,8 @@ namespace ChequeRequisiontService.Endpoints.Bank.CreateBank
             .WithName("CreateBank")
             .Produces<CreateBankResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithTags("Bank");
+            .WithTags("Bank")
+            .RequireAuthorization();
         }
     }
 }

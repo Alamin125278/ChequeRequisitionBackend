@@ -9,6 +9,7 @@ using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,32 @@ builder.Services.AddSignalR()
 
 builder.Services.AddCarter();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+    // Add this for Bearer token support
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token.\n\nExample: Bearer abc123xyz"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services.AddDbContext<CRDBContext>(opts =>
 {
@@ -49,9 +75,9 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins([
             "http://localhost:5173"
-        ]).AllowAnyMethod()     // Allow any HTTP method (GET, POST, etc.)
+        ]).AllowAnyMethod()     
         .AllowAnyHeader()
-        .AllowCredentials();    // Allow any header
+        .AllowCredentials();   
     });
 });
 
@@ -64,17 +90,21 @@ var app = builder.Build();
 // Use the CORS policy
 app.UseCors("AllowAll");
 
-app.MapHub<AppHub>("/e-procurement-hub", options =>
+app.MapHub<AppHub>("/cheque-requisition", options =>
 {
     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
 });
+
+app.UseMiddleware<AuthenticationMiddleware>();
+
 
 // Configure the HTTP request pipeline.
 app.MapCarter();
 
 app.MapGet("/", () => "Cheque Requisition Service is running!");
 
-
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseExceptionHandler(options => { });
 
@@ -86,8 +116,8 @@ app.UseHealthChecks("/health",
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();                          // Serve the Swagger JSON
-    app.UseSwaggerUI();                        // Serve the Swagger UI
+    app.UseSwagger();                          
+    app.UseSwaggerUI();                        
 }
 
 app.Run();

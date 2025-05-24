@@ -33,7 +33,7 @@ public class CreateUserHandler(IPasswordHasher<UserDto> passwordHasher, IUserRep
     {
         var user = request.Adapt<UserDto>();
         user.PasswordHash= _passwordHasher.HashPassword(user, request.PasswordHash);
-
+       
         var createdUser = await _userRepo.CreateAsync(user, 1);
         
         return new CreateUserResult(createdUser);
