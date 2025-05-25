@@ -37,7 +37,7 @@ public partial class Branch
 
     public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitionBranches { get; set; } = new List<ChequeBookRequisition>();
 
-    public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitionReceiviningBranches { get; set; } = new List<ChequeBookRequisition>();
+    public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitionReceivingBranches { get; set; } = new List<ChequeBookRequisition>();
 
     public virtual User? CreatedByNavigation { get; set; }
 

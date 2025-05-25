@@ -19,7 +19,7 @@ namespace ChequeRequisiontService.Endpoints.User.UpdateUser
                 var result = await sender.Send(command, cancellationToken);
                 return Results.Ok(result);
             }).WithName("UpdateUser")
-              .WithTags("Users")
+              .WithTags("User")
               .Produces<UpdateUserResult>(StatusCodes.Status200OK)
               .Produces(StatusCodes.Status400BadRequest)
               .Produces(StatusCodes.Status404NotFound);

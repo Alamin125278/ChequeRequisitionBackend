@@ -11,7 +11,8 @@ namespace ChequeRequisiontService.Endpoints.Requisition.UpdateRequisition
             {
                 var result = await sender.Send(command with { Id = id }, cancellationToken);
                 return result.Requisition != null ? Results.Ok(result) : Results.NotFound();
-            }).Produces<UpdateRequisitionResult>(StatusCodes.Status200OK)
+            }).Accepts<UpdateRequisitionResult>("application/json")
+               .Produces<UpdateRequisitionResult>(StatusCodes.Status200OK)
               .Produces(StatusCodes.Status404NotFound)
               .Produces(StatusCodes.Status400BadRequest)
               .WithName("UpdateRequisition")

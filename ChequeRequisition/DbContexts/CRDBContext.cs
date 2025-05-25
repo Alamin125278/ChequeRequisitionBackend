@@ -50,6 +50,9 @@ public partial class CRDBContext : DbContext
 
     public virtual DbSet<Vendor> Vendors { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=ChequeBookRe;User Id=sa;Password=alamin1252;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;Trusted_Connection=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -191,9 +194,6 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.AccountName)
                 .HasMaxLength(60)
                 .IsUnicode(false);
-            entity.Property(e => e.AccountNo)
-                .HasMaxLength(50)
-                .IsUnicode(false);
             entity.Property(e => e.ChequePrefix)
                 .HasMaxLength(10)
                 .IsUnicode(false);
@@ -204,9 +204,6 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.CusAddress).HasColumnType("text");
             entity.Property(e => e.MicrNo)
                 .HasMaxLength(13)
-                .IsUnicode(false);
-            entity.Property(e => e.RouetingNo)
-                .HasMaxLength(9)
                 .IsUnicode(false);
             entity.Property(e => e.Series)
                 .HasMaxLength(10)
@@ -225,8 +222,8 @@ public partial class CRDBContext : DbContext
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("FK__ChequeBoo__Creat__5629CD9C");
 
-            entity.HasOne(d => d.ReceiviningBranch).WithMany(p => p.ChequeBookRequisitionReceiviningBranches)
-                .HasForeignKey(d => d.ReceiviningBranchId)
+            entity.HasOne(d => d.ReceivingBranch).WithMany(p => p.ChequeBookRequisitionReceivingBranches)
+                .HasForeignKey(d => d.ReceivingBranchId)
                 .HasConstraintName("FK__ChequeBoo__recei__5441852A");
 
             entity.HasOne(d => d.RequestedByNavigation).WithMany(p => p.ChequeBookRequisitionRequestedByNavigations)
@@ -276,12 +273,20 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Menus__3214EC0796C7CF49");
 
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Icon)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.MenuName)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            entity.Property(e => e.Path)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Title)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -433,9 +438,11 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC07502C3C27");
 
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.RoleName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<UserRoleDefaultMenuPermission>(entity =>
@@ -443,6 +450,9 @@ public partial class CRDBContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC075FFB7CE4");
 
             entity.ToTable("UserRoleDefaultMenuPermission");
+
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.Menu).WithMany(p => p.UserRoleDefaultMenuPermissions)
                 .HasForeignKey(d => d.MenuId)

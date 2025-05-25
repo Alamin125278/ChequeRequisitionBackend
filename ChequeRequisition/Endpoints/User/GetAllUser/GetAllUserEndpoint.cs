@@ -8,12 +8,12 @@ namespace ChequeRequisiontService.Endpoints.User.GetAllUser
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapGet("/api/users", async (int? skip,int? limit,string? search,ISender sender) =>
+            app.MapGet("/api/users", async (int? skip, int? limit, string? search, ISender sender) =>
             {
-                var result = await sender.Send(new GetAllUserQuery(skip?? 0,limit?? 10,search));
+                var result = await sender.Send(new GetAllUserQuery(skip ?? 0, limit ?? 10, search));
                 var response = result.Adapt<GetUserResult>();
                 return Results.Ok(response);
-            });
+            }).WithTags("User");
         }
     }
 }

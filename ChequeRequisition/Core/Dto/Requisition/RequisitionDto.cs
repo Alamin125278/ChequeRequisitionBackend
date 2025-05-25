@@ -21,8 +21,8 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
         public required int TransactionCode { get; set; }
         public required int Leaves { get; set; }
         public required int CourierCode { get; set; }
-        public required int ReceiviningBranchId { get; set; }
-        public required DateOnly RequisitionDate { get; set; }
+        public required int ReceivingBranchId { get; set; }
+        public required DateOnly RequestDate { get; set; }
         public required int Serverity { get; set; }
         public required int Status { get; set; } // Assuming 1 is the default status for a new requisition
         public bool IsDeleted { get; set; } = false;

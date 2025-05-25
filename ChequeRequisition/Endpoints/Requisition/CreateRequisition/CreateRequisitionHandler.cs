@@ -6,7 +6,7 @@ using Mapster;
 
 namespace ChequeRequisiontService.Endpoints.Requisition.CreateRequisition
 {
-    public record CreateRequisitionCommand(int BankId, int BranchId, string AccountNo, string RoutingNo, int StartNo, int EndNo, string ChequeType, string ChequePrefix, string MicrNo, string Series, string AccountName, string CusAddress, int BookQty, int TransactionCode, int Leaves, int CourierCode, int ReceiviningBranchId, string RequisitionDate, int Serverity):ICommand<CreateRequisitionResult>;
+    public record CreateRequisitionCommand(int BankId, int BranchId, int AccountNo, int RoutingNo, int StartNo, int EndNo, string ChequeType, string ChequePrefix, string MicrNo, string Series, string AccountName, string CusAddress, int BookQty, int TransactionCode, int Leaves, int CourierCode, int ReceivingBranchId, string RequestDate, int Serverity):ICommand<CreateRequisitionResult>;
    public record CreateRequisitionResult(RequisitionDto RequisitionDto);
     public class CreateRequisitionCommandValidator : AbstractValidator<CreateRequisitionCommand>
     {
@@ -28,8 +28,8 @@ namespace ChequeRequisiontService.Endpoints.Requisition.CreateRequisition
             RuleFor(x => x.TransactionCode).NotEmpty().WithMessage("Transaction Code is required.");
             RuleFor(x => x.Leaves).NotEmpty().WithMessage("Leaves are required.");
             RuleFor(x => x.CourierCode).NotEmpty().WithMessage("Courier Code is required.");
-            RuleFor(x => x.ReceiviningBranchId).NotEmpty().WithMessage("Receiving Branch ID is required.");
-            RuleFor(x => x.RequisitionDate).NotEmpty().WithMessage("Requisition Date is required.");
+            RuleFor(x => x.ReceivingBranchId).NotEmpty().WithMessage("Receiving Branch ID is required.");
+            RuleFor(x => x.RequestDate).NotEmpty().WithMessage("Requisition Date is required.");
             RuleFor(x => x.Serverity).NotEmpty().WithMessage("Serverity is required.");
         }
     }
@@ -38,8 +38,11 @@ namespace ChequeRequisiontService.Endpoints.Requisition.CreateRequisition
         private readonly IRequisitonRepo _requisitonRepo = requisitonRepo;
         public async Task<CreateRequisitionResult> Handle(CreateRequisitionCommand request, CancellationToken cancellationToken)
         {
+            
             var requisition = request.Adapt<RequisitionDto>();
-            requisition.RequisitionDate = DateOnly.Parse(request.RequisitionDate);
+            requisition.RequestDate = DateOnly.Parse(request.RequestDate);
+
+
             var createdRequisition = await _requisitonRepo.CreateAsync(requisition, 1, cancellationToken);
             return new CreateRequisitionResult(createdRequisition);
         }

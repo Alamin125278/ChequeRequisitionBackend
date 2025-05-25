@@ -48,7 +48,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(int Skip = 0, int Limit = 10, string? Search = null, CancellationToken cancellationToken = default)
         {
             var data= await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
-                .Where(x => x.AccountNo.Contains(Search)|| x.ChequePrefix.Contains(Search) || Search == null)
+                .Where(x => (x.AccountNo != null && x.AccountNo.ToString().Contains(Search)) || x.ChequePrefix.Contains(Search) || Search == null)
                 .Where(x => x.IsDeleted == false)
                 .Skip(Skip)
                 .Take(Limit)
@@ -75,6 +75,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                 requisition = entity.Adapt(requisition);
                 requisition.UpdatedAt = DateTime.UtcNow;
                 requisition.UpdatedBy = UserId;
+                requisition.Status = 1;
                 var result = await _cRDBContext.SaveChangesAsync(cancellationToken);
                 if (result > 0)
                 {

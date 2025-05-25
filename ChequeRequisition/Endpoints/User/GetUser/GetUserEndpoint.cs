@@ -7,12 +7,12 @@ namespace ChequeRequisiontService.Endpoints.User.GetUser
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapGet("/api/user/{id}", async (int id, IMediator mediator) =>
+            app.MapGet("/api/user/{id}", async (int id, ISender sender) =>
             {
-                var result = await mediator.Send(new GetUserByIdQuery(id));
+                var result = await sender.Send(new GetUserByIdQuery(id));
                 return result.User is not null ? Results.Ok(result) : Results.NotFound();
             }).WithName("GetUserById")
-              .WithTags("Users")
+              .WithTags("User")
               .Produces<GetUserByIdResult>(StatusCodes.Status200OK)
               .Produces(StatusCodes.Status404NotFound);
         }

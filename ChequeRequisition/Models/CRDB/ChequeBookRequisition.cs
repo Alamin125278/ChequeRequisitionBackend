@@ -13,9 +13,9 @@ public partial class ChequeBookRequisition
 
     public int? RequestedBy { get; set; }
 
-    public string? AccountNo { get; set; }
+    public int? AccountNo { get; set; }
 
-    public string? RouetingNo { get; set; }
+    public int? RoutingNo { get; set; }
 
     public int? StartNo { get; set; }
 
@@ -41,7 +41,7 @@ public partial class ChequeBookRequisition
 
     public int? CourierCode { get; set; }
 
-    public int? ReceiviningBranchId { get; set; }
+    public int? ReceivingBranchId { get; set; }
 
     public DateOnly? RequestDate { get; set; }
 
@@ -67,7 +67,7 @@ public partial class ChequeBookRequisition
 
     public virtual User? CreatedByNavigation { get; set; }
 
-    public virtual Branch? ReceiviningBranch { get; set; }
+    public virtual Branch? ReceivingBranch { get; set; }
 
     public virtual User? RequestedByNavigation { get; set; }
 

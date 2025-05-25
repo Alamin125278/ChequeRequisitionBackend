@@ -7,12 +7,15 @@ using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.Requisition.UpdateRequisition
 {
-    public record UpdateRequisitionCommand(int Id, string AccountNo, string RoutingNo, int StartNo, int EndNo, string ChequeType, string ChequePrefix, string MicrNo, string Series, string AccountName, string CusAddress, int BookQty, int TransactionCode, int Leaves, int CourierCode, int ReceiviningBranchId, DateOnly RequisitionDate, int Serverity) : ICommand<UpdateRequisitionResult>;
+    public record UpdateRequisitionCommand(int Id,int BankId,int BranchId, int AccountNo, int RoutingNo, int StartNo, int EndNo, string ChequeType, string ChequePrefix, string MicrNo, string Series, string AccountName, string CusAddress, int BookQty, int TransactionCode, int Leaves, int CourierCode, int ReceivingBranchId, int Serverity) : ICommand<UpdateRequisitionResult>;
     public record UpdateRequisitionResult(string Message, RequisitionDto Requisition);
     public class UpdateRequisitionCommandValidator : AbstractValidator<UpdateRequisitionCommand>
     {
         public UpdateRequisitionCommandValidator()
         {
+            RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required.");
+            RuleFor(x => x.BankId).NotEmpty().WithMessage("Bank Id is required.");
+            RuleFor(x => x.BranchId).NotEmpty().WithMessage("Branch Id is required.");
             RuleFor(x => x.AccountNo).NotEmpty().WithMessage("Account number is required.");
             RuleFor(x => x.RoutingNo).NotEmpty().WithMessage("Routing number is required.");
             RuleFor(x => x.StartNo).GreaterThan(0).WithMessage("Start number must be greater than 0.");
@@ -27,8 +30,7 @@ namespace ChequeRequisiontService.Endpoints.Requisition.UpdateRequisition
             RuleFor(x => x.TransactionCode).GreaterThan(0).WithMessage("Transaction code must be greater than 0.");
             RuleFor(x => x.Leaves).GreaterThan(0).WithMessage("Leaves must be greater than 0.");
             RuleFor(x => x.CourierCode).GreaterThan(0).WithMessage("Courier code must be greater than 0.");
-            RuleFor(x => x.ReceiviningBranchId).GreaterThan(0).WithMessage("Receiving branch ID must be greater than 0.");
-            RuleFor(x => x.RequisitionDate).NotNull().WithMessage("Requisition date is required.");
+            RuleFor(x => x.ReceivingBranchId).GreaterThan(0).WithMessage("Receiving branch ID must be greater than 0.");
         }
     }
     public class UpdateRequisitionHandler(IRequisitonRepo requisitonRepo) : ICommandHandler<UpdateRequisitionCommand, UpdateRequisitionResult>
@@ -38,7 +40,8 @@ namespace ChequeRequisiontService.Endpoints.Requisition.UpdateRequisition
         {
             var requisition = request.Adapt<RequisitionDto>();
             var id = request.Id;
-            
+            //requisition.RequestDate = DateOnly.Parse(request.RequestDate);
+
             var updatedRequisition = await _requisitonRepo.UpdateAsync(requisition, id, 1, cancellationToken);
             
             return new UpdateRequisitionResult("Cheque requisition updated successfully", updatedRequisition);
