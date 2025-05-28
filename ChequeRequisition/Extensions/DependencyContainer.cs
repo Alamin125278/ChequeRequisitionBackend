@@ -8,6 +8,7 @@ using ChequeRequisiontService.Infrastructure.Repositories.BranchRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision;
 using ChequeRequisiontService.Infrastructure.Repositories.MenuRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo;
+using ChequeRequisiontService.Infrastructure.Repositories.UserMenuPermissionRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.UserRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.UserRoleRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.VendorRepo;
@@ -33,6 +34,7 @@ public static class DependencyContainer
         services.AddScoped<IMenuRepo, MenuRepo>();
         services.AddScoped<IUserRoleRepo, UserRoleRepo>();
         services.AddScoped<IDefaultMenuPermisionRepo, DefaultMenuPermisionRepo>();
+        services.AddScoped<IUserMenuPermissionRepo, UserMenuPermissionRepo>();
 
     }
 }

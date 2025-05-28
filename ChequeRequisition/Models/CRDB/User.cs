@@ -77,7 +77,11 @@ public partial class User
 
     public virtual User? UpdatedByNavigation { get; set; }
 
-    public virtual ICollection<UserMenuPermission> UserMenuPermissions { get; set; } = new List<UserMenuPermission>();
+    public virtual ICollection<UserMenuPermission> UserMenuPermissionCreatedByNavigations { get; set; } = new List<UserMenuPermission>();
+
+    public virtual ICollection<UserMenuPermission> UserMenuPermissionUpdatedByNavigations { get; set; } = new List<UserMenuPermission>();
+
+    public virtual ICollection<UserMenuPermission> UserMenuPermissionUsers { get; set; } = new List<UserMenuPermission>();
 
     public virtual Vendor? Vendor { get; set; }
 }

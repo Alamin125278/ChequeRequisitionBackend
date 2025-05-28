@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ChequeRequisiontService.Core.Dto.Vendor;
+using System.ComponentModel.DataAnnotations;
 
 namespace ChequeRequisiontService.Core.Dto.Bank
 {
@@ -13,6 +14,8 @@ namespace ChequeRequisiontService.Core.Dto.Bank
         public required string BankEmail { get; set; }
         public required string BankPhone { get; set; }
         public required string BankAddress { get; set; }
-        public Boolean IsDeleted { get; set; } = false;
+        public Boolean IsActive { get; set; } = true;
+        public VendorDto? Vendor { get; set; }
+        public string VendorName => Vendor?.VendorName ?? "";
     }
 }

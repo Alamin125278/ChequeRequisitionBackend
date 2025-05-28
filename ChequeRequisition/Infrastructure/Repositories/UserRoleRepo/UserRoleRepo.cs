@@ -56,6 +56,11 @@ public class UserRoleRepo(CRDBContext cRDBContext) : IUserRoleRepo
         return data.Adapt<IEnumerable<UserRoleDto>>();
     }
 
+    public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<UserRoleDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var userRole = await _cRDBContext.UserRoles

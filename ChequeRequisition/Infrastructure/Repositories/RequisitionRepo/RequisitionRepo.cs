@@ -56,6 +56,11 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
             return data.Adapt<IEnumerable<RequisitionDto>>();
         }
 
+        public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<RequisitionDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var requsition = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()

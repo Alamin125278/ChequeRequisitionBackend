@@ -8,7 +8,7 @@ namespace ChequeRequisiontService.Endpoints.Menu.GetAllMenu
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapGet("/api/meni", async (int? skip, int? limit, string? search, ISender sender, CancellationToken cancellation) =>
+            app.MapGet("/api/menu", async (int? skip, int? limit, string? search, ISender sender, CancellationToken cancellation) =>
             {
                 var result = await sender.Send(new GetAllMenuQuery(skip ?? 0, limit ?? 10, search), cancellation);
                 return Results.Ok(result.Adapt<GetAllMenuResponse>());

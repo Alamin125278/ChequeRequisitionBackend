@@ -5,6 +5,7 @@ using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
 {
@@ -56,6 +57,39 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
                 .Take(Limit)
                 .ToListAsync(cancellationToken);
             return data.Adapt<IEnumerable<BankDto>>();
+            throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<BankDto>> GetAllAsync(int Skip = 0, int Limit = 10, string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default)
+        {
+            
+            var query = _cRDBContext.Banks.AsNoTracking()
+                .Include(x => x.Vendor)
+                .Where(x => (x.BankName.Contains(Search) || x.BankEmail.Contains(Search) || x.BankCode.Contains(Search) || x.RoutingNumber.Contains(Search) || Search == null))
+                .Where(x => x.IsDeleted == false)
+                .Where(x=>x.IsActive==IsActive || IsActive==null);
+
+            var data = await query
+                .Skip(Skip)
+                .Take(Limit)
+                .ToListAsync(cancellationToken);
+            return data.Adapt<IEnumerable<BankDto>>();
+        }
+
+        public Task<int> GetAllCountAsync(string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default)
+        {
+            var count = _cRDBContext.Banks.AsNoTracking()
+                .Where(x => (x.BankName.Contains(Search) || x.BankEmail.Contains(Search) || x.BankCode.Contains(Search) || x.RoutingNumber.Contains(Search) || Search == null))
+                .Where(x => (x.IsDeleted == false))
+                .Where(x=>x.IsActive==IsActive || IsActive==null)
+                .Select(x=>x.Id)
+                .CountAsync();
+            return count;
+        }
+
+        public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<BankDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)

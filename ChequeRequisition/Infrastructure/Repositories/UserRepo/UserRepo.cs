@@ -64,6 +64,11 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
         throw new NotImplementedException();
     }
 
+    public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<UserDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var data = await _cRDBContext.Users.FirstOrDefaultAsync(x => x.Id == id);

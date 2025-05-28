@@ -425,12 +425,26 @@ public partial class CRDBContext : DbContext
 
             entity.ToTable("UserMenuPermission");
 
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.UserMenuPermissionCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserMenuPermission_Users1");
+
             entity.HasOne(d => d.Menu).WithMany(p => p.UserMenuPermissions)
                 .HasForeignKey(d => d.MenuId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__UserMenuP__MenuI__6EF57B66");
 
-            entity.HasOne(d => d.User).WithMany(p => p.UserMenuPermissions)
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.UserMenuPermissionUpdatedByNavigations)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK_UserMenuPermission_Users");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserMenuPermissionUsers)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__UserMenuP__UserI__6E01572D");
         });
 

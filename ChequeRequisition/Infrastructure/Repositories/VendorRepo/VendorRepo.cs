@@ -63,6 +63,11 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.VendorRepo
             return data.Adapt<IEnumerable<VendorDto>>();
         }
 
+        public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<VendorDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var data =await _cRDBContext.Vendors.AsNoTracking()

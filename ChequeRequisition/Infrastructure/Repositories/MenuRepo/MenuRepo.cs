@@ -59,6 +59,11 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.MenuRepo
             return data.Adapt<IEnumerable<MenuDto>>();
         }
 
+        public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<MenuDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var data =await _cRDBContext.Menus.AsNoTracking()

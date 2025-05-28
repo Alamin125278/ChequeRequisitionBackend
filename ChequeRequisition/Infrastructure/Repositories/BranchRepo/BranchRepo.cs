@@ -58,6 +58,11 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data.Adapt<IEnumerable<BranchDto>>();
         }
 
+        public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<BranchDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var data = await _cRDBContext.Branches.AsNoTracking()

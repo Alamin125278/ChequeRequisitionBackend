@@ -60,6 +60,11 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermisi
             return data.Adapt<IEnumerable<DefaultMenuPermisionDto>>();
         }
 
+        public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<DefaultMenuPermisionDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var defaultMenuPermision = await _cRDBContext.UserRoleDefaultMenuPermissions
