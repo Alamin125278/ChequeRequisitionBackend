@@ -16,6 +16,7 @@ namespace ChequeRequisiontService.Endpoints.Bank.UpdateBank
                 var result = await sender.Send(command, cancellationToken);
                 return Results.Ok(result);
             }).Accepts<UpdateBankCommand>("application/json")
+            .RequireAuthorization()
               .WithName("UpdateBank")
               .WithTags("Banks")
               .Produces<UpdateBankResult>(StatusCodes.Status200OK)

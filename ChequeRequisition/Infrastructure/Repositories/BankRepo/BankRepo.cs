@@ -76,9 +76,9 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
             return data.Adapt<IEnumerable<BankDto>>();
         }
 
-        public Task<int> GetAllCountAsync(string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default)
+        public async Task<int> GetAllCountAsync(string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default)
         {
-            var count = _cRDBContext.Banks.AsNoTracking()
+            var count = await _cRDBContext.Banks.AsNoTracking()
                 .Where(x => (x.BankName.Contains(Search) || x.BankEmail.Contains(Search) || x.BankCode.Contains(Search) || x.RoutingNumber.Contains(Search) || Search == null))
                 .Where(x => (x.IsDeleted == false))
                 .Where(x=>x.IsActive==IsActive || IsActive==null)
@@ -87,9 +87,14 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
             return count;
         }
 
-        public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
+        public async Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var count =await  _cRDBContext.Banks.AsNoTracking()
+                .Where(x => (x.BankName.Contains(Search) || x.BankEmail.Contains(Search) || x.BankCode.Contains(Search) || x.RoutingNumber.Contains(Search) || Search == null))
+                .Where(x => (x.IsDeleted == false))
+                .Select(x => x.Id)
+                .CountAsync();
+            return count;
         }
 
         public async Task<BankDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)

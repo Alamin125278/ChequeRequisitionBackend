@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.Bank.CreateBank
 {
-    public record CreateBankCommand(int VendorId, string BankName, string BankCode, string RoutingNumber, string BankEmail, string BankPhone, string BankAddress):ICommand<CreateBankResult>;
+    public record CreateBankCommand(int VendorId, string BankName, string BankCode, string RoutingNumber, string BankEmail, string BankPhone, string BankAddress,string ? IsActive=null):ICommand<CreateBankResult>;
    public record CreateBankResult(BankDto Bank);
 
     public class CreateBankValidator : AbstractValidator<CreateBankCommand>
@@ -29,7 +29,10 @@ namespace ChequeRequisiontService.Endpoints.Bank.CreateBank
         private readonly IBankRepo _bankRepo = bankRepo;
         public async Task<CreateBankResult> Handle(CreateBankCommand request, CancellationToken cancellationToken)
         {
+            bool activeStatus = request.IsActive == "InActive" ? false : true;
+            request = request with { IsActive = null };
             var bank = request.Adapt<BankDto>();
+            bank.IsActive = activeStatus;
             var createdBank = await _bankRepo.CreateAsync(bank, authenticatedUserInfo.Id, cancellationToken);
             return new CreateBankResult(createdBank);
         }

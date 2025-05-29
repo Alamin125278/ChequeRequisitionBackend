@@ -18,6 +18,7 @@ namespace ChequeRequisiontService.Endpoints.Bank.DeleteBank
             .Produces(StatusCodes.Status404NotFound)
             .WithName("DeleteBank")
             .WithTags("Bank")
+            .RequireAuthorization()
             .WithDescription("Soft deletes a bank by setting IsDeleted = true.");
         }
     }

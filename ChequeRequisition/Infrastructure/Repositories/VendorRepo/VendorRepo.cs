@@ -5,6 +5,7 @@ using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace ChequeRequisiontService.Infrastructure.Repositories.VendorRepo
@@ -59,6 +60,15 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.VendorRepo
                 .Where(x => x.IsDelete == false)
                 .Skip(Skip)
                 .Take(Limit)
+                .ToListAsync(cancellationToken);
+            return data.Adapt<IEnumerable<VendorDto>>();
+        }
+
+        public async Task<IEnumerable<VendorDto>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+
+            var data = await _cRDBContext.Vendors.AsNoTracking()
+                .Where(x => x.IsDelete == false)
                 .ToListAsync(cancellationToken);
             return data.Adapt<IEnumerable<VendorDto>>();
         }

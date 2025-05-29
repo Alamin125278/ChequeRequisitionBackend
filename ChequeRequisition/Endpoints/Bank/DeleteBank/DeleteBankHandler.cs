@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
 
@@ -14,7 +15,7 @@ namespace ChequeRequisiontService.Endpoints.Bank.DeleteBank
             RuleFor(x=>x.Id).GreaterThan(0).WithMessage("Bank ID must be greater than 0.");
         }
     }
-    public class DeleteBankHandler(IBankRepo bankRepo) : ICommandHandler<DeleteBankCommand, DeleteBankResult>
+    public class DeleteBankHandler(IBankRepo bankRepo, AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<DeleteBankCommand, DeleteBankResult>
     {
         public async Task<DeleteBankResult> Handle(DeleteBankCommand request, CancellationToken cancellationToken)
         {
@@ -24,8 +25,8 @@ namespace ChequeRequisiontService.Endpoints.Bank.DeleteBank
             {
                 return new DeleteBankResult(false, $"Bank with ID {request.Id} not found.");
             }
-            await bankRepo.DeleteAsync(id, 1, cancellationToken);
-            return new DeleteBankResult(true, $"Bank with ID {request.Id} deleted successfully.");
+            await bankRepo.DeleteAsync(id, authenticatedUserInfo.Id, cancellationToken);
+            return new DeleteBankResult(Success:true, Message:$"Bank with ID {request.Id} deleted successfully.");
 
         }
     }
