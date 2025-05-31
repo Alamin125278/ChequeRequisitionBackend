@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.BranchDto;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -7,7 +8,7 @@ using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.Branch.CreateBranch
 {
-    public record CreateBranchCommand(int BankId, string BranchName, string BranchCode, string BranchEmail, string BranchPhone, string BranchAddress, string RoutingNo):ICommand<CreateBranchResult>;
+    public record CreateBranchCommand(int BankId, string BranchName, string BranchCode, string BranchEmail, string BranchPhone, string BranchAddress, string RoutingNo, string? IsActive = null) :ICommand<CreateBranchResult>;
    public record CreateBranchResult(BranchDto Branch);
     public class CreateBranchCommandValidator : AbstractValidator<CreateBranchCommand>
     {
@@ -22,13 +23,16 @@ namespace ChequeRequisiontService.Endpoints.Branch.CreateBranch
             RuleFor(x => x.RoutingNo).NotEmpty().WithMessage("Routing Number is required.");
         }
     }
-    public class CreateBranchHandler(IBranchRepo branchRepo):ICommandHandler<CreateBranchCommand, CreateBranchResult>
+    public class CreateBranchHandler(IBranchRepo branchRepo, AuthenticatedUserInfo authenticatedUserInfo) :ICommandHandler<CreateBranchCommand, CreateBranchResult>
     {
         private readonly IBranchRepo _branchRepo = branchRepo;
         public async Task<CreateBranchResult> Handle(CreateBranchCommand request, CancellationToken cancellationToken)
         {
+            bool activeStatus = request.IsActive == "InActive" ? false : true;
+            request = request with { IsActive = null };
             var branch = request.Adapt<BranchDto>();
-            var createdBranch = await _branchRepo.CreateAsync(branch, 1, cancellationToken);
+            branch.IsActive = activeStatus;
+            var createdBranch = await _branchRepo.CreateAsync(branch, authenticatedUserInfo.Id, cancellationToken);
             return new CreateBranchResult(createdBranch);
         }
     }

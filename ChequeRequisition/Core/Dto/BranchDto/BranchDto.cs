@@ -1,4 +1,6 @@
-﻿namespace ChequeRequisiontService.Core.Dto.BranchDto
+﻿using ChequeRequisiontService.Core.Dto.Bank;
+
+namespace ChequeRequisiontService.Core.Dto.BranchDto
 {
     public class BranchDto
     {
@@ -10,6 +12,8 @@
         public required string BranchPhone { get; set; }
         public required string BranchAddress { get; set; }
         public required string RoutingNo { get; set; }
-        public bool IsDeleted { get; set; } = false;
+        public bool IsActive { get; set; } = true;
+        public BankDto? Bank { get; set; }
+        public string BankName => Bank?.BankName ?? string.Empty;
     }
 }

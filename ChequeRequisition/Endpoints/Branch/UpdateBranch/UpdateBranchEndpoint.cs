@@ -7,7 +7,7 @@ namespace ChequeRequisiontService.Endpoints.Branch.UpdateBranch
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPut("/api/branch/{id}", async (int id, UpdateBranchCommand command, ISender sender) =>
+            app.MapPatch("/api/branch/{id}", async (int id, UpdateBranchCommand command, ISender sender) =>
             {
                 var result = await sender.Send(command with { Id = id });
                 return result.Branch != null ? Results.Ok(result) : Results.NotFound();
@@ -16,6 +16,7 @@ namespace ChequeRequisiontService.Endpoints.Branch.UpdateBranch
             .Produces<UpdateBranchResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
+            .RequireAuthorization()
             .WithTags("Branch")
             .WithDescription("Update a branch by ID");
         }

@@ -58,9 +58,39 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data.Adapt<IEnumerable<BranchDto>>();
         }
 
+     
+
+        public async Task<IEnumerable<BranchDto>> GetAllAsync(int? BankId = null, int Skip = 0, int Limit = 10, string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default)
+        {
+            var query = _cRDBContext.Branches.AsNoTracking()
+               .Include(x => x.Bank)
+               .Where(x => x.BranchName.Contains(Search) || x.BranchEmail.Contains(Search) || x.BranchCode.Contains(Search) || x.RoutingNo.Contains(Search) || Search == null)
+               .Where(x => x.IsDeleted == false)
+               .Where(x => x.IsActive == IsActive || IsActive == null)
+               .Where(x => x.BankId == BankId || BankId == null);
+
+            var data = await query
+                .Skip(Skip)
+                .Take(Limit)
+                .ToListAsync(cancellationToken);
+            return data.Adapt<IEnumerable<BranchDto>>();
+        }
+
         public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<int> GetAllCountAsync(string? Search = null, int? BankId = null, bool? IsActive = null, CancellationToken cancellationToken = default)
+        {
+            var count = await _cRDBContext.Branches.AsNoTracking()
+                .Where(x => (x.BranchName.Contains(Search) || x.BranchEmail.Contains(Search) || x.BranchCode.Contains(Search) || x.RoutingNo.Contains(Search) || Search == null))
+                .Where(x => x.IsDeleted == false)
+                .Where(x => x.IsActive == IsActive || IsActive == null)
+                .Where(x => x.BankId == BankId || BankId == null)
+                .CountAsync(cancellationToken);
+            return count;
+
         }
 
         public async Task<BranchDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)

@@ -15,6 +15,7 @@ namespace ChequeRequisiontService.Endpoints.Branch.DeleteBranch
                 return Results.Ok($"Branch with ID {id} deleted successfully.");
             }).Produces<DeleteBranchResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization()
             .WithName("DeleteBranch")
             .WithTags("Branch")
             .WithDescription("Soft deletes a Branch by setting IsDeleted = true.");
