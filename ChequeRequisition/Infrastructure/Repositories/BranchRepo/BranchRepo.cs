@@ -1,5 +1,5 @@
 ﻿using ChequeRequisiontService.Core.Dto.Bank;
-using ChequeRequisiontService.Core.Dto.BranchDto;
+using ChequeRequisiontService.Core.Dto.Branch;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
@@ -76,6 +76,16 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data.Adapt<IEnumerable<BranchDto>>();
         }
 
+        public async Task<IEnumerable<BranchDto>> GetAllAsync(int? BankId = null, CancellationToken cancellationToken = default)
+        {
+            var query = _cRDBContext.Branches.AsNoTracking()
+               .Where(x => x.IsDeleted == false)
+               .Where(x => x.IsActive == true)
+               .Where(x => x.BankId == BankId || BankId == null);
+
+            var data = await query.ToListAsync(cancellationToken);
+            return data.Adapt<IEnumerable<BranchDto>>();
+        }
         public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();

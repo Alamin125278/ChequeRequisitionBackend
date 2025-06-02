@@ -4,6 +4,7 @@ using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ChequeRequisiontService.Infrastructure.Repositories.UserRoleRepo;
 
@@ -53,6 +54,20 @@ public class UserRoleRepo(CRDBContext cRDBContext) : IUserRoleRepo
             .Skip(Skip)
             .Take(Limit)
             .ToListAsync(cancellationToken);
+        return data.Adapt<IEnumerable<UserRoleDto>>();
+    }
+
+    public async Task<IEnumerable<UserRoleDto>> GetAllAsync(int? bankId, CancellationToken cancellationToken = default)
+    {
+        var query = _cRDBContext.UserRoles.AsNoTracking()
+        .Where(x => x.IsDeleted == false)
+        .Where(x=> x.IsActive == true);
+
+        if (bankId != null)
+        {
+            query = query.Where(x => x.Id != 1 && x.Id != 2);
+        }
+        var data =await query.ToListAsync(cancellationToken);
         return data.Adapt<IEnumerable<UserRoleDto>>();
     }
 

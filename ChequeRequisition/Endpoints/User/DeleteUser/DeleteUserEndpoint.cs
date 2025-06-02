@@ -17,6 +17,7 @@ namespace ChequeRequisiontService.Endpoints.User.DeleteUser
               .Produces(StatusCodes.Status404NotFound)
               .WithName("DeleteUser")
               .WithTags("User")
+              .RequireAuthorization()
               .WithDescription("Soft deletes a user by setting IsDeleted = true.");
         }
     }

@@ -16,6 +16,7 @@ public class CreateUserEndpoint : ICarterModule
           .Produces<CreateUserResult>(StatusCodes.Status200OK)
           .Produces(StatusCodes.Status400BadRequest)
           .WithName("CreateUser")
+          .RequireAuthorization()
           .WithTags("User")
           .WithDescription("Create a new user.");
     }

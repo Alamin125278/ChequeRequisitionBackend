@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.User;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -6,7 +7,7 @@ using Mapster;
 
 namespace ChequeRequisiontService.Endpoints.User.UpdateUser
 {
-    public record UpdateUserCommand(int Id, int? BankId, int? BranchId, int? VendorId, string Name, string Email, string UserName, string ImagePath, string Role, bool IsActive) : ICommand<UpdateUserResult>;
+    public record UpdateUserCommand(int Id, int? BankId, int? BranchId, int? VendorId, string Name, string Email, string UserName, string ImagePath, int Role, string? IsActive = null) : ICommand<UpdateUserResult>;
    public record UpdateUserResult(UserDto User);
     public class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
     {
@@ -21,15 +22,18 @@ namespace ChequeRequisiontService.Endpoints.User.UpdateUser
             RuleFor(x => x.IsActive).NotNull().WithMessage("IsActive is required.");
         }
     }
-    public class UpdateUserHandler(IUserRepo userRepo) : ICommandHandler<UpdateUserCommand, UpdateUserResult>
+    public class UpdateUserHandler(IUserRepo userRepo,AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<UpdateUserCommand, UpdateUserResult>
     {
         private readonly IUserRepo _userRepo = userRepo;
         public async Task<UpdateUserResult> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
+            bool activeStatus = request.IsActive != "InActive";
+            request = request with { IsActive = null };
             var user = request.Adapt<UserDto>();
+            user.IsActive = activeStatus;
             var id = request.Id;
             
-            var updatedUser = await _userRepo.UpdateAsync(user,id, 1, cancellationToken);
+            var updatedUser = await _userRepo.UpdateAsync(user,id,authenticatedUserInfo.Id, cancellationToken);
             
             return new UpdateUserResult(updatedUser);
         }

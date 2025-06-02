@@ -1,5 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
-using ChequeRequisiontService.Core.Dto.BranchDto;
+using ChequeRequisiontService.Core.Dto.Branch;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 
 namespace ChequeRequisiontService.Endpoints.Branch.GetBranch

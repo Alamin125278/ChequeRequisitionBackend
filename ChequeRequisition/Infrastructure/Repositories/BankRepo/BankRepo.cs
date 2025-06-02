@@ -82,6 +82,10 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
                  .Where(x=> x.Id==BankId || BankId==null)
                  .Where(x => x.IsDeleted == false)
                  .Where(x => x.IsActive == true);
+            if (BankId !=null)
+            {
+                query = query.Where(x => x.Id == BankId);
+            }
 
             var data = await query
                 .ToListAsync(cancellationToken);

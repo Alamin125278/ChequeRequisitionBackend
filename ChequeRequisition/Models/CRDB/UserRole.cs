@@ -22,4 +22,6 @@ public partial class UserRole
     public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<UserRoleDefaultMenuPermission> UserRoleDefaultMenuPermissions { get; set; } = new List<UserRoleDefaultMenuPermission>();
+
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

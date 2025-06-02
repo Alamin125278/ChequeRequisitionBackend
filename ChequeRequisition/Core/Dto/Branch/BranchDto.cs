@@ -1,6 +1,6 @@
 ﻿using ChequeRequisiontService.Core.Dto.Bank;
 
-namespace ChequeRequisiontService.Core.Dto.BranchDto
+namespace ChequeRequisiontService.Core.Dto.Branch
 {
     public class BranchDto
     {

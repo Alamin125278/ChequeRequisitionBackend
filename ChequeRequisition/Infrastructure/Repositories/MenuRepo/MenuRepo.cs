@@ -1,4 +1,4 @@
-﻿using ChequeRequisiontService.Core.Dto.BranchDto;
+﻿using ChequeRequisiontService.Core.Dto.Branch;
 using ChequeRequisiontService.Core.Dto.Menu;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;

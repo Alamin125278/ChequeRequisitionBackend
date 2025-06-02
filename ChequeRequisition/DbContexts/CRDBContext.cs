@@ -390,9 +390,6 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(255)
                 .IsUnicode(false);
-            entity.Property(e => e.Role)
-                .HasMaxLength(50)
-                .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
             entity.Property(e => e.UserName)
                 .HasMaxLength(50)
@@ -410,13 +407,17 @@ public partial class CRDBContext : DbContext
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("FK_Users_CreatedBy");
 
+            entity.HasOne(d => d.RoleNavigation).WithMany(p => p.Users)
+                .HasForeignKey(d => d.Role)
+                .HasConstraintName("FK_Users_UserRoles");
+
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.InverseUpdatedByNavigation)
                 .HasForeignKey(d => d.UpdatedBy)
                 .HasConstraintName("FK_Users_UpdatedBy");
 
             entity.HasOne(d => d.Vendor).WithMany(p => p.Users)
                 .HasForeignKey(d => d.VendorId)
-                .HasConstraintName("FK_Users_Vendor");
+                .HasConstraintName("FK_Users_Vendors");
         });
 
         modelBuilder.Entity<UserMenuPermission>(entity =>

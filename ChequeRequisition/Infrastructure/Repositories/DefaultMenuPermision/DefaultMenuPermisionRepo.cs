@@ -4,6 +4,7 @@ using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Data.Common;
 
 namespace ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision
@@ -56,6 +57,17 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermisi
                 .Take(Limit)
                 .ToListAsync(cancellationToken);
            if(data == null)
+                return [];
+            return data.Adapt<IEnumerable<DefaultMenuPermisionDto>>();
+        }
+
+        public async Task<IEnumerable<DefaultMenuPermisionDto>> GetAllAsync(int Role, CancellationToken cancellationToken = default)
+        {
+            var data = await _cRDBContext.UserRoleDefaultMenuPermissions.AsNoTracking()
+                .Where(x=>x.IsActive==true)
+                .Where(x=>x.IsDeleted==false)
+                .ToListAsync(cancellationToken);
+            if (data == null)
                 return [];
             return data.Adapt<IEnumerable<DefaultMenuPermisionDto>>();
         }

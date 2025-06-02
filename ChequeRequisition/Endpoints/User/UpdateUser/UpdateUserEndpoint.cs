@@ -20,6 +20,7 @@ namespace ChequeRequisiontService.Endpoints.User.UpdateUser
                 return Results.Ok(result);
             }).WithName("UpdateUser")
               .WithTags("User")
+              .RequireAuthorization()
               .Produces<UpdateUserResult>(StatusCodes.Status200OK)
               .Produces(StatusCodes.Status400BadRequest)
               .Produces(StatusCodes.Status404NotFound);

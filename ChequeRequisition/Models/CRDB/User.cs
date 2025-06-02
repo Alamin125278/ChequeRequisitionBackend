@@ -23,7 +23,7 @@ public partial class User
 
     public string? ImagePath { get; set; }
 
-    public string? Role { get; set; }
+    public int? Role { get; set; }
 
     public bool? IsActive { get; set; }
 
@@ -68,6 +68,8 @@ public partial class User
     public virtual ICollection<User> InverseUpdatedByNavigation { get; set; } = new List<User>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual UserRole? RoleNavigation { get; set; }
 
     public virtual ICollection<SetSerialNumber> SetSerialNumberCreatedByNavigations { get; set; } = new List<SetSerialNumber>();
 
