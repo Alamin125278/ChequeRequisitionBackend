@@ -1,4 +1,5 @@
-﻿using ChequeRequisiontService.Core.Dto.User;
+﻿using ChequeRequisiontService.Core.Dto.Auth;
+using ChequeRequisiontService.Core.Dto.User;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ChequeRequisiontService.Core.Interfaces.Repositories;
@@ -9,6 +10,7 @@ public interface IUserRepo : IGenericRepository<UserDto>
     Task<UserDto?> GetUserByEmailOrUserName(string UserNameOrEmail);
     Task<int> GetAllCountAsync(int? BankId = null, int? BranchId = null, int? RoleId = null, string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default);
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task<bool> UpdatedPasswordAsunc(int Id,ChangedPasswordDto entity,int userId, CancellationToken cancellationToken = default);
 
 }
 

@@ -1,4 +1,5 @@
-﻿using ChequeRequisiontService.Core.Dto.User;
+﻿using ChequeRequisiontService.Core.Dto.Auth;
+using ChequeRequisiontService.Core.Dto.User;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
@@ -159,5 +160,23 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
         {
             throw new Exception("Database update error", ex.InnerException ?? ex);
         }
+    }
+
+    public async Task<bool> UpdatedPasswordAsunc(int Id, ChangedPasswordDto entity, int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _cRDBContext.Users.FirstOrDefaultAsync(x => x.Id == Id);
+        if (user == null)
+        {
+            throw new NotFoundException("User not found");
+        }
+        user.PasswordHash = entity.NewPassword;
+        user.UpdatedAt = DateTime.UtcNow;
+        user.UpdatedBy = userId;
+        var result = await _cRDBContext.SaveChangesAsync(cancellationToken);
+        if (result > 0)
+        {
+            return true;
+        }
+        throw new Exception("Failed to update password");
     }
 }
