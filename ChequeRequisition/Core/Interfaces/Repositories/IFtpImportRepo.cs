@@ -6,6 +6,6 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories;
 
 public interface IFtpImportRepo
 {
-    Task<bool> BulkInsertRequisitionsAsync(IEnumerable<ChequeBookRequisition> list,CancellationToken cancellationToken=default);
-    Task<bool> InsertFtpLogAsync(FtpImportLogDto log,CancellationToken cancellationToken=default);
+    Task<List<int>> BulkInsertRequisitionsAsync(IEnumerable<ChequeBookRequisition> list,CancellationToken cancellationToken=default);
+    Task<int> InsertFtpLogAsync(FtpImportLogDto log,CancellationToken cancellationToken=default);
 }

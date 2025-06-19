@@ -12,7 +12,15 @@ public class FtpWorkerJobService(FtpSetting ftpSetting, IServiceScopeFactory sco
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation($"[BANK {_ftpSetting.BankName}] Worker started.");
+        //_logger.LogInformation($"[BANK {_ftpSetting.BankName}] Worker started.");
+        using var outerScope = _scopeFactory.CreateScope();
+        var logDb = outerScope.ServiceProvider.GetRequiredService<IFtpLogDbService>();
+        await logDb.InsertFtpLogAsync(new FtpFileLogDto
+        {
+            BankName = _ftpSetting.BankName,
+            LogLevel = "Information",
+            Message = "Worker started."
+        }, stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -20,6 +28,8 @@ public class FtpWorkerJobService(FtpSetting ftpSetting, IServiceScopeFactory sco
             var ftpService = scope.ServiceProvider.GetRequiredService<IFtpService>();
             var parser = scope.ServiceProvider.GetRequiredService<IExcelParserService>();
             var repo = scope.ServiceProvider.GetRequiredService<IFtpImportRepo>();
+            var logDbScope = scope.ServiceProvider.GetRequiredService<IFtpLogDbService>();
+            var trackingRepo =scope.ServiceProvider.GetRequiredService<IRequisitionTrackingRepo>();
 
             try
             {
@@ -35,9 +45,9 @@ public class FtpWorkerJobService(FtpSetting ftpSetting, IServiceScopeFactory sco
                         //foreach (var item in items)
                             //item.BankId = _ftpSetting.BankId;
 
-                        await repo.BulkInsertRequisitionsAsync(items, stoppingToken);
+                        var requisitionIds=await repo.BulkInsertRequisitionsAsync(items, stoppingToken);
 
-                        await repo.InsertFtpLogAsync(new FtpImportLogDto
+                        var importLogId =await repo.InsertFtpLogAsync(new FtpImportLogDto
                         {
                             BankId = 3,
                             Filename = file,
@@ -46,18 +56,46 @@ public class FtpWorkerJobService(FtpSetting ftpSetting, IServiceScopeFactory sco
                             UpdatedAt = DateTime.UtcNow
                         }, stoppingToken);
 
+                        var trackings = requisitionIds.Select(id => new RequisitionImportTrackingDto
+                        {
+                            RequisitionId = id,
+                            ImportLogId = importLogId
+                        }).ToList();
+
+                        await trackingRepo.InsertTrackingAsync(trackings, stoppingToken);
+
                         await ftpService.DeleteAsync(file, _ftpSetting);
-                        _logger.LogInformation($"[BANK {_ftpSetting.BankName}] Imported: {file}");
+                        //_logger.LogInformation($"[BANK {_ftpSetting.BankName}] Imported: {file}");
+                        await logDbScope.InsertFtpLogAsync(new FtpFileLogDto
+                        {
+                            BankName = _ftpSetting.BankName,
+                            LogLevel = "Information",
+                            Message = $"Imported: {file}"
+                        }, stoppingToken);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[BANK {_ftpSetting.BankName}] Failed: {file}");
+                        //_logger.LogError(ex, $"[BANK {_ftpSetting.BankName}] Failed: {file}");
+                        await logDbScope.InsertFtpLogAsync(new FtpFileLogDto
+                        {
+                            BankName = _ftpSetting.BankName,
+                            LogLevel = "Error",
+                            Message = $"Failed: {file}",
+                            Exception = ex.ToString()
+                        }, stoppingToken);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"[BANK {_ftpSetting.BankName}] Connection failed");
+                //_logger.LogError(ex, $"[BANK {_ftpSetting.BankName}] Connection failed");
+                await logDb.InsertFtpLogAsync(new FtpFileLogDto
+                {
+                    BankName = _ftpSetting.BankName,
+                    LogLevel = "Error",
+                    Message = "Connection failed",
+                    Exception = ex.ToString()
+                }, stoppingToken);
             }
 
             await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);

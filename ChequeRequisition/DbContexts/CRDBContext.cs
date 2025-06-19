@@ -28,7 +28,11 @@ public partial class CRDBContext : DbContext
 
     public virtual DbSet<ChequeBookRequisition> ChequeBookRequisitions { get; set; }
 
+    public virtual DbSet<FtpFileShareLog> FtpFileShareLogs { get; set; }
+
     public virtual DbSet<FtpImport> FtpImports { get; set; }
+
+    public virtual DbSet<FtpRequisitionTracking> FtpRequisitionTrackings { get; set; }
 
     public virtual DbSet<Menu> Menus { get; set; }
 
@@ -239,6 +243,17 @@ public partial class CRDBContext : DbContext
                 .HasConstraintName("FK__ChequeBoo__Updat__571DF1D5");
         });
 
+        modelBuilder.Entity<FtpFileShareLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__FtpFileS__3214EC0747FFA587");
+
+            entity.Property(e => e.BankName).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.LogLevel).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<FtpImport>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__ftp_impo__3213E83F1658B506");
@@ -267,6 +282,25 @@ public partial class CRDBContext : DbContext
             entity.HasOne(d => d.Bank).WithMany(p => p.FtpImports)
                 .HasForeignKey(d => d.BankId)
                 .HasConstraintName("FK__ftp_impor__bank___76969D2E");
+        });
+
+        modelBuilder.Entity<FtpRequisitionTracking>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__FtpRequi__3214EC075489F86D");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.ImportLog).WithMany(p => p.FtpRequisitionTrackings)
+                .HasForeignKey(d => d.ImportLogId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__FtpRequis__Impor__4C0144E4");
+
+            entity.HasOne(d => d.Requisition).WithMany(p => p.FtpRequisitionTrackings)
+                .HasForeignKey(d => d.RequisitionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__FtpRequis__Requi__4B0D20AB");
         });
 
         modelBuilder.Entity<Menu>(entity =>

@@ -46,5 +46,7 @@ public static class DependencyContainer
         services.AddScoped<IFtpService,FtpService>();
         //services.AddHostedService<FtpImportService>();
         services.AddHostedService<FtpWorkerStarter>();
+        services.AddScoped<IFtpLogDbService, FtpLogDbService>();
+        services.AddScoped<IRequisitionTrackingRepo, RequisitionTrackingRepo>();
     }
 }
