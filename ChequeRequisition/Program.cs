@@ -1,4 +1,5 @@
 using Carter;
+using ChequeRequisiontService.Core.Dto.Ftp;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Extensions;
 using ChequeRequisiontService.Infrastructure.SignalRrepo;
@@ -63,6 +64,7 @@ builder.Services.AddDbContext<CRDBContext>(opts =>
 {
     opts.UseSqlServer(builder.Configuration.GetConnectionString("CRDB")!);
 });
+builder.Services.Configure<List<FtpSetting>>(builder.Configuration.GetSection("FtpServers"));
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 

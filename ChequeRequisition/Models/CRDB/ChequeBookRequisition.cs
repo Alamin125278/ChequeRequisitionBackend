@@ -7,47 +7,47 @@ public partial class ChequeBookRequisition
 {
     public int Id { get; set; }
 
-    public int? BankId { get; set; }
+    public string BankName { get; set; } = null!;
 
-    public int? BranchId { get; set; }
+    public string BranchName { get; set; } = null!;
 
     public int? RequestedBy { get; set; }
 
-    public int? AccountNo { get; set; }
+    public long AccountNo { get; set; }
 
-    public int? RoutingNo { get; set; }
+    public int RoutingNo { get; set; }
 
-    public int? StartNo { get; set; }
+    public int StartNo { get; set; }
 
     public int? EndNo { get; set; }
 
     public string? ChequeType { get; set; }
 
-    public string? ChequePrefix { get; set; }
+    public string ChequePrefix { get; set; } = null!;
 
-    public string? MicrNo { get; set; }
+    public string MicrNo { get; set; } = null!;
 
-    public string? Series { get; set; }
+    public string Series { get; set; } = null!;
 
-    public string? AccountName { get; set; }
+    public string AccountName { get; set; } = null!;
 
-    public string? CusAddress { get; set; }
+    public string CusAddress { get; set; } = null!;
 
-    public int? BookQty { get; set; }
+    public int BookQty { get; set; }
 
-    public int? TransactionCode { get; set; }
+    public int TransactionCode { get; set; }
 
-    public int? Leaves { get; set; }
+    public int Leaves { get; set; }
 
-    public int? CourierCode { get; set; }
+    public int CourierCode { get; set; }
 
-    public int? ReceivingBranchId { get; set; }
+    public string ReceivingBranchName { get; set; } = null!;
 
-    public DateOnly? RequestDate { get; set; }
+    public DateOnly RequestDate { get; set; }
 
-    public int? Serverity { get; set; }
+    public int Serverity { get; set; }
 
-    public int? Status { get; set; }
+    public int Status { get; set; }
 
     public bool IsDeleted { get; set; }
 
@@ -59,19 +59,13 @@ public partial class ChequeBookRequisition
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual Bank? Bank { get; set; }
-
-    public virtual Branch? Branch { get; set; }
-
     public virtual ICollection<ChallanDetail> ChallanDetails { get; set; } = new List<ChallanDetail>();
 
     public virtual User? CreatedByNavigation { get; set; }
 
-    public virtual Branch? ReceivingBranch { get; set; }
-
     public virtual User? RequestedByNavigation { get; set; }
 
-    public virtual Status? StatusNavigation { get; set; }
+    public virtual Status StatusNavigation { get; set; } = null!;
 
     public virtual User? UpdatedByNavigation { get; set; }
 }

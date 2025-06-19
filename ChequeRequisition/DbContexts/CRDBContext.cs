@@ -82,6 +82,7 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Banks__3214EC07F507CD98");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.BankAddress)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -117,6 +118,7 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Branches__3214EC077E51D051");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.BranchAddress)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -194,6 +196,12 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.AccountName)
                 .HasMaxLength(60)
                 .IsUnicode(false);
+            entity.Property(e => e.BankName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.BranchName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.ChequePrefix)
                 .HasMaxLength(10)
                 .IsUnicode(false);
@@ -205,26 +213,17 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.MicrNo)
                 .HasMaxLength(13)
                 .IsUnicode(false);
+            entity.Property(e => e.ReceivingBranchName)
+                .HasMaxLength(150)
+                .IsUnicode(false);
             entity.Property(e => e.Series)
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Bank).WithMany(p => p.ChequeBookRequisitions)
-                .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK__ChequeBoo__BankI__5165187F");
-
-            entity.HasOne(d => d.Branch).WithMany(p => p.ChequeBookRequisitionBranches)
-                .HasForeignKey(d => d.BranchId)
-                .HasConstraintName("FK__ChequeBoo__Branc__52593CB8");
-
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ChequeBookRequisitionCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("FK__ChequeBoo__Creat__5629CD9C");
-
-            entity.HasOne(d => d.ReceivingBranch).WithMany(p => p.ChequeBookRequisitionReceivingBranches)
-                .HasForeignKey(d => d.ReceivingBranchId)
-                .HasConstraintName("FK__ChequeBoo__recei__5441852A");
 
             entity.HasOne(d => d.RequestedByNavigation).WithMany(p => p.ChequeBookRequisitionRequestedByNavigations)
                 .HasForeignKey(d => d.RequestedBy)
@@ -232,6 +231,7 @@ public partial class CRDBContext : DbContext
 
             entity.HasOne(d => d.StatusNavigation).WithMany(p => p.ChequeBookRequisitions)
                 .HasForeignKey(d => d.Status)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ChequeBoo__Statu__5535A963");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.ChequeBookRequisitionUpdatedByNavigations)

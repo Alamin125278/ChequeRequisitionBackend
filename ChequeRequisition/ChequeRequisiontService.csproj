@@ -16,7 +16,10 @@
 	<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
 	<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
 	<PackageReference Include="Carter" Version="8.0.0" />
+	<PackageReference Include="ClosedXML" Version="0.105.0" />
 	<PackageReference Include="Dapper" Version="2.1.35" />
+	<PackageReference Include="EPPlus" Version="8.0.5" />
+	<PackageReference Include="FluentFTP" Version="34.0.0" />
 	<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
 	<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="8.0.8" />
 	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
