@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using System.Numerics;
 
 namespace ChequeRequisiontService.Core.Dto.Requisition
 {
@@ -7,8 +8,8 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
         public int Id { get; set; }
         public required string BankName { get; set; }
         public required string BranchName { get; set; }
-        public required string AccountNo { get; set; }
-        public required string RoutingNo { get; set; }
+        public required BigInteger AccountNo { get; set; }
+        public required int RoutingNo { get; set; }
         public required int StartNo { get; set; }
         public required int EndNo { get; set; }
         public required string ChequeType { get; set; } 

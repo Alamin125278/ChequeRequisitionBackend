@@ -8,6 +8,7 @@ using ChequeRequisiontService.Infrastructure.Repositories.BankRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.BranchRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision;
 using ChequeRequisiontService.Infrastructure.Repositories.FtpImportExcel;
+using ChequeRequisiontService.Infrastructure.Repositories.LocalFileUploadRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.MenuRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.UploadImageRepo;
@@ -48,5 +49,6 @@ public static class DependencyContainer
         services.AddHostedService<FtpWorkerStarter>();
         services.AddScoped<IFtpLogDbService, FtpLogDbService>();
         services.AddScoped<IRequisitionTrackingRepo, RequisitionTrackingRepo>();
+        services.AddScoped<ILocalFileUploadRepo, LocalFileUploadRepo>();
     }
 }

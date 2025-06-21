@@ -62,6 +62,16 @@ public class FtpService : IFtpService
         using var client = CreateClient(setting);
         await client.ConnectAsync();
         await client.DownloadAsync(stream, $"{setting.RemotePath}/{filename}");
+
+        stream.Position = 0;
+        var projectFolder = Path.Combine(Directory.GetCurrentDirectory(), "FtpFiles");
+        Directory.CreateDirectory(projectFolder);
+        var localFilePath = Path.Combine(projectFolder, filename);
+
+        using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
+        {
+            await stream.CopyToAsync(fileStream);
+        }
         stream.Position = 0;
         return stream;
     }
