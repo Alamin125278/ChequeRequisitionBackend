@@ -1,4 +1,5 @@
 ﻿using ChequeRequisiontService.Core.Dto.Ftp;
+using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.Core.Interfaces.Services.FtpServices;
 using ChequeRequisiontService.Models.CRDB;
 using ClosedXML.Excel;
@@ -10,11 +11,12 @@ using System.Numerics;
 
 namespace ChequeRequisiontService.Infrastructure.Services.FtpServices;
 
-public class ExcelParserService : IExcelParserService
+public class ExcelParserService(IBranchRepo branchRepo) : IExcelParserService
 {
+    private readonly IBranchRepo _branchRepo = branchRepo;
     public async Task<IEnumerable<ChequeBookRequisition>> ParseAsync(Stream stream, FtpSetting ftp)
     {
-        return await Task.Run(() =>
+        return await Task.Run(async () =>
         {
             var requisitions = new List<ChequeBookRequisition>();
 
@@ -24,6 +26,10 @@ public class ExcelParserService : IExcelParserService
             for (int i = 2; i <= ws.LastRowUsed().RowNumber(); i++)
             {
                 var row = ws.Row(i);
+                var branchName= row.Cell(12).GetString();
+                var receivingBranchName= row.Cell(19).GetString();
+                int branchId = await _branchRepo.GetIdAsync(ftp.BankId, branchName);
+                int receivingBranchId = await _branchRepo.GetIdAsync(ftp.BankId, receivingBranchName);
 
                 string chequePrefix = row.Cell(5).GetString().Trim().ToUpper(); 
                 string chequeType = "";
@@ -43,13 +49,13 @@ public class ExcelParserService : IExcelParserService
                 var micrNo = accountNoRaw.Length >= 13? accountNoRaw.Substring(accountNoRaw.Length - 13, 13): accountNoRaw;
                 var requisition = new ChequeBookRequisition
                 {
-                    BankName = ftp.BankName,
-                    BranchName = row.Cell(12).GetString(),
+                    BankId = ftp.BankId,
+                    BranchId =branchId,
                     RequestedBy = 1,
-                    AccountNo = (long)BigInteger.Parse(row.Cell(3).GetString()),
-                    RoutingNo = int.Parse(row.Cell(2).GetString()),
-                    StartNo = int.Parse(row.Cell(7).GetString()),
-                    EndNo = int.Parse(row.Cell(8).GetString()),
+                    AccountNo = row.Cell(3).GetString(),
+                    RoutingNo = row.Cell(2).GetString(),
+                    StartNo = row.Cell(7).GetString(),
+                    EndNo = row.Cell(8).GetString(),
                     ChequeType = chequeType,
                     ChequePrefix = row.Cell(5).GetString(),
                     MicrNo = micrNo,
@@ -60,7 +66,7 @@ public class ExcelParserService : IExcelParserService
                     TransactionCode = int.Parse(row.Cell(11).GetString()),
                     Leaves = int.Parse(row.Cell(9).GetString()),
                     CourierCode = 1,
-                    ReceivingBranchName = row.Cell(19).GetString(),
+                    ReceivingBranchId = receivingBranchId,
                     RequestDate = DateOnly.ParseExact(row.Cell(14).GetString(), "dd-MM-yyyy", CultureInfo.InvariantCulture),
                     Serverity = 1,
                     Status = 3,

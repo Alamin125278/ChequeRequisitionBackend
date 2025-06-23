@@ -110,6 +110,15 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data?.Adapt<BranchDto>();
         }
 
+        public async Task<int> GetIdAsync(int BankId, string BranchName, CancellationToken cancellationToken = default)
+        {
+            var branchId = await _cRDBContext.Branches.AsNoTracking()
+                .Where(x => x.BankId == BankId && x.BranchName == BranchName && x.IsDeleted == false)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+            return branchId;
+        }
+
         public async Task<BranchDto> UpdateAsync(BranchDto entity, int Id, int UserId, CancellationToken cancellationToken = default)
         {
             try

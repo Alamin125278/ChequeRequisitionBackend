@@ -200,11 +200,8 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.AccountName)
                 .HasMaxLength(60)
                 .IsUnicode(false);
-            entity.Property(e => e.BankName)
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.BranchName)
-                .HasMaxLength(100)
+            entity.Property(e => e.AccountNo)
+                .HasMaxLength(30)
                 .IsUnicode(false);
             entity.Property(e => e.ChequePrefix)
                 .HasMaxLength(10)
@@ -214,20 +211,41 @@ public partial class CRDBContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CusAddress).HasColumnType("text");
+            entity.Property(e => e.EndNo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.MicrNo)
                 .HasMaxLength(13)
                 .IsUnicode(false);
-            entity.Property(e => e.ReceivingBranchName)
-                .HasMaxLength(150)
+            entity.Property(e => e.RoutingNo)
+                .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.Series)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            entity.Property(e => e.StartNo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Bank).WithMany(p => p.ChequeBookRequisitions)
+                .HasForeignKey(d => d.BankId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ChequeBookRequisitions_Banks");
+
+            entity.HasOne(d => d.Branch).WithMany(p => p.ChequeBookRequisitionBranches)
+                .HasForeignKey(d => d.BranchId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ChequeBookRequisitions_Branches");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ChequeBookRequisitionCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("FK__ChequeBoo__Creat__5629CD9C");
+
+            entity.HasOne(d => d.ReceivingBranch).WithMany(p => p.ChequeBookRequisitionReceivingBranches)
+                .HasForeignKey(d => d.ReceivingBranchId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ChequeBookRequisitions_Branches1");
 
             entity.HasOne(d => d.RequestedByNavigation).WithMany(p => p.ChequeBookRequisitionRequestedByNavigations)
                 .HasForeignKey(d => d.RequestedBy)

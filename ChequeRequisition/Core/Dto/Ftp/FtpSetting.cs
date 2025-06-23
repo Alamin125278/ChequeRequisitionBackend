@@ -2,6 +2,7 @@
 
 public class FtpSetting
 {
+    public required int BankId { get; set; }
     public required string BankName { get; set; }
     public required string Host { get; set; }
     public required string User { get; set; }

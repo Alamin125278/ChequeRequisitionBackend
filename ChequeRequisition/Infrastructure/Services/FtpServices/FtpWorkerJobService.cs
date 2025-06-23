@@ -49,7 +49,7 @@ public class FtpWorkerJobService(FtpSetting ftpSetting, IServiceScopeFactory sco
 
                         var importLogId =await repo.InsertFtpLogAsync(new FtpImportLogDto
                         {
-                            BankId = 3,
+                            BankId = _ftpSetting.BankId,
                             Filename = file,
                             ImportedAt = DateTime.UtcNow,
                             CreatedAt = DateTime.UtcNow,

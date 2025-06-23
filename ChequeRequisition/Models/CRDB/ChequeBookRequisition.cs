@@ -7,19 +7,19 @@ public partial class ChequeBookRequisition
 {
     public int Id { get; set; }
 
-    public string BankName { get; set; } = null!;
+    public int BankId { get; set; }
 
-    public string BranchName { get; set; } = null!;
+    public int BranchId { get; set; }
 
     public int? RequestedBy { get; set; }
 
-    public long AccountNo { get; set; }
+    public string AccountNo { get; set; } = null!;
 
-    public int RoutingNo { get; set; }
+    public string RoutingNo { get; set; } = null!;
 
-    public int StartNo { get; set; }
+    public string StartNo { get; set; } = null!;
 
-    public int? EndNo { get; set; }
+    public string? EndNo { get; set; }
 
     public string? ChequeType { get; set; }
 
@@ -41,7 +41,7 @@ public partial class ChequeBookRequisition
 
     public int CourierCode { get; set; }
 
-    public string ReceivingBranchName { get; set; } = null!;
+    public int ReceivingBranchId { get; set; }
 
     public DateOnly RequestDate { get; set; }
 
@@ -59,11 +59,17 @@ public partial class ChequeBookRequisition
 
     public DateTime? UpdatedAt { get; set; }
 
+    public virtual Bank Bank { get; set; } = null!;
+
+    public virtual Branch Branch { get; set; } = null!;
+
     public virtual ICollection<ChallanDetail> ChallanDetails { get; set; } = new List<ChallanDetail>();
 
     public virtual User? CreatedByNavigation { get; set; }
 
     public virtual ICollection<FtpRequisitionTracking> FtpRequisitionTrackings { get; set; } = new List<FtpRequisitionTracking>();
+
+    public virtual Branch ReceivingBranch { get; set; } = null!;
 
     public virtual User? RequestedByNavigation { get; set; }
 

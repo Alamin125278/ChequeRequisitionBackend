@@ -35,6 +35,8 @@ public partial class Bank
 
     public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
 
+    public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitions { get; set; } = new List<ChequeBookRequisition>();
+
     public virtual User? CreatedByNavigation { get; set; }
 
     public virtual ICollection<FtpImport> FtpImports { get; set; } = new List<FtpImport>();
