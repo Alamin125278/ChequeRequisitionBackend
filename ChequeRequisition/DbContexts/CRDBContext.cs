@@ -84,9 +84,8 @@ public partial class CRDBContext : DbContext
 
         modelBuilder.Entity<Bank>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Banks__3214EC07F507CD98");
+            entity.HasKey(e => e.Id).HasName("PK__Banks__3214EC07328B1456");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.BankAddress)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -107,22 +106,21 @@ public partial class CRDBContext : DbContext
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.BankCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK_Bank_CreatedBy");
+                .HasConstraintName("FK_Banks_Users");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.BankUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK_Banks_UpdatedBy");
+                .HasConstraintName("FK_Banks_Users1");
 
             entity.HasOne(d => d.Vendor).WithMany(p => p.Banks)
                 .HasForeignKey(d => d.VendorId)
-                .HasConstraintName("FK_Banks_VendorId");
+                .HasConstraintName("FK_Banks_Vendors");
         });
 
         modelBuilder.Entity<Branch>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Branches__3214EC077E51D051");
+            entity.HasKey(e => e.Id).HasName("PK__Branches__3214EC07F3622F4C");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.BranchAddress)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -146,15 +144,15 @@ public partial class CRDBContext : DbContext
 
             entity.HasOne(d => d.Bank).WithMany(p => p.Branches)
                 .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK_Branches_Bank");
+                .HasConstraintName("FK_Branches_Banks");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.BranchCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK_Branches_CreatedBy");
+                .HasConstraintName("FK_Branches_Users");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.BranchUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK_Branches_UpdatedBy");
+                .HasConstraintName("FK_Branches_Users1");
         });
 
         modelBuilder.Entity<Challan>(entity =>
@@ -173,7 +171,7 @@ public partial class CRDBContext : DbContext
 
             entity.HasOne(d => d.ReceivingBranchNavigation).WithMany(p => p.Challans)
                 .HasForeignKey(d => d.ReceivingBranch)
-                .HasConstraintName("FK__Challans__Receiv__5DCAEF64");
+                .HasConstraintName("FK_Challans_Branches");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.ChallanUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
@@ -279,27 +277,18 @@ public partial class CRDBContext : DbContext
             entity.ToTable("ftp_imports");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.BankId).HasColumnName("bank_id");
-            entity.Property(e => e.ClearedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("cleared_at");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("created_at");
-            entity.Property(e => e.Filename)
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.FileName)
                 .HasMaxLength(255)
-                .IsUnicode(false)
-                .HasColumnName("filename");
-            entity.Property(e => e.ImportedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("imported_at");
+                .IsUnicode(false);
+            entity.Property(e => e.ImportedAt).HasColumnType("datetime");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Bank).WithMany(p => p.FtpImports)
                 .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK__ftp_impor__bank___76969D2E");
+                .HasConstraintName("FK_ftp_imports_Banks");
         });
 
         modelBuilder.Entity<FtpRequisitionTracking>(entity =>
@@ -382,7 +371,7 @@ public partial class CRDBContext : DbContext
 
             entity.HasOne(d => d.Bank).WithMany(p => p.SetSerialNumbers)
                 .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK__SetSerial__BankI__71D1E811");
+                .HasConstraintName("FK_SetSerialNumbers_Banks");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.SetSerialNumberCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
@@ -449,11 +438,11 @@ public partial class CRDBContext : DbContext
 
             entity.HasOne(d => d.Bank).WithMany(p => p.Users)
                 .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK_Users_Bank");
+                .HasConstraintName("FK_Users_Banks");
 
             entity.HasOne(d => d.Branch).WithMany(p => p.Users)
                 .HasForeignKey(d => d.BranchId)
-                .HasConstraintName("FK_Users_Branch");
+                .HasConstraintName("FK_Users_Branches");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.InverseCreatedByNavigation)
                 .HasForeignKey(d => d.CreatedBy)

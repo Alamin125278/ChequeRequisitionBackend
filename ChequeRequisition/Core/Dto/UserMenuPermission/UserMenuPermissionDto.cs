@@ -5,6 +5,6 @@
         public int Id { get; set; }
         public required int UserId { get; set; }
         public required int MenuId { get; set; }
-        public required bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; } = true;
     }
 }

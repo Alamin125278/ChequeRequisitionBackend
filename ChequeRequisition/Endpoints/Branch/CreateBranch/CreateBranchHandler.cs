@@ -4,7 +4,6 @@ using ChequeRequisiontService.Core.Dto.Branch;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
 using Mapster;
-using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.Branch.CreateBranch
 {

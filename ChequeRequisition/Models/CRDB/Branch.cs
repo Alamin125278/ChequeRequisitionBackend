@@ -9,13 +9,13 @@ public partial class Branch
 
     public int? BankId { get; set; }
 
-    public string? BranchName { get; set; }
+    public string BranchName { get; set; } = null!;
 
-    public string? BranchCode { get; set; }
+    public string BranchCode { get; set; } = null!;
 
-    public string? BranchEmail { get; set; }
+    public string BranchEmail { get; set; } = null!;
 
-    public string? BranchAddress { get; set; }
+    public string BranchAddress { get; set; } = null!;
 
     public string? BranchPhone { get; set; }
 

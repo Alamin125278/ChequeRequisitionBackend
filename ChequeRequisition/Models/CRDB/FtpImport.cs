@@ -9,11 +9,9 @@ public partial class FtpImport
 
     public int? BankId { get; set; }
 
-    public string? Filename { get; set; }
+    public string? FileName { get; set; }
 
     public DateTime? ImportedAt { get; set; }
-
-    public DateTime? ClearedAt { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

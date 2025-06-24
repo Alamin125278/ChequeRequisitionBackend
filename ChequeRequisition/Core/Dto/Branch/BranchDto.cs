@@ -1,10 +1,12 @@
 ﻿using ChequeRequisiontService.Core.Dto.Bank;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChequeRequisiontService.Core.Dto.Branch
 {
     public class BranchDto
     {
-        public int Id { get; set; }
+      
         public required int BankId { get; set; }
         public required string BranchName { get; set; }
         public required string BranchCode { get; set; }

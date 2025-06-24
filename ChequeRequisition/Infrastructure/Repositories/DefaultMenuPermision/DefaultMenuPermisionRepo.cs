@@ -64,6 +64,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermisi
         public async Task<IEnumerable<DefaultMenuPermisionDto>> GetAllAsync(int Role, CancellationToken cancellationToken = default)
         {
             var data = await _cRDBContext.UserRoleDefaultMenuPermissions.AsNoTracking()
+                .Where(x=>x.RoleId ==Role)
                 .Where(x=>x.IsActive==true)
                 .Where(x=>x.IsDeleted==false)
                 .ToListAsync(cancellationToken);
