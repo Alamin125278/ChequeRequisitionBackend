@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.Requisition;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -6,7 +7,7 @@ using Mapster;
 
 namespace ChequeRequisiontService.Endpoints.Requisition.CreateRequisition
 {
-    public record CreateRequisitionCommand(int BankId, int BranchId, int AccountNo, int RoutingNo, int StartNo, int EndNo, string ChequeType, string ChequePrefix, string MicrNo, string Series, string AccountName, string CusAddress, int BookQty, int TransactionCode, int Leaves, int CourierCode, int ReceivingBranchId, string RequestDate, int Serverity):ICommand<CreateRequisitionResult>;
+    public record CreateRequisitionCommand(int BankId, int BranchId, string AccountNo, string RoutingNo, string StartNo, string EndNo, string ChequeType, string ChequePrefix, string MicrNo, string Series, string AccountName, string CusAddress, int BookQty, int TransactionCode, int Leaves, int CourierCode, int ReceivingBranchId, string RequestDate, int Serverity):ICommand<CreateRequisitionResult>;
    public record CreateRequisitionResult(RequisitionDto RequisitionDto);
     public class CreateRequisitionCommandValidator : AbstractValidator<CreateRequisitionCommand>
     {
@@ -33,7 +34,7 @@ namespace ChequeRequisiontService.Endpoints.Requisition.CreateRequisition
             RuleFor(x => x.Serverity).NotEmpty().WithMessage("Serverity is required.");
         }
     }
-    public class CreateRequisitionHandler(IRequisitonRepo requisitonRepo):ICommandHandler<CreateRequisitionCommand, CreateRequisitionResult>
+    public class CreateRequisitionHandler(IRequisitonRepo requisitonRepo,AuthenticatedUserInfo authenticatedUserInfo):ICommandHandler<CreateRequisitionCommand, CreateRequisitionResult>
     {
         private readonly IRequisitonRepo _requisitonRepo = requisitonRepo;
         public async Task<CreateRequisitionResult> Handle(CreateRequisitionCommand request, CancellationToken cancellationToken)
@@ -43,7 +44,7 @@ namespace ChequeRequisiontService.Endpoints.Requisition.CreateRequisition
             requisition.RequestDate = DateOnly.Parse(request.RequestDate);
 
 
-            var createdRequisition = await _requisitonRepo.CreateAsync(requisition, 1, cancellationToken);
+            var createdRequisition = await _requisitonRepo.CreateAsync(requisition, authenticatedUserInfo.Id, cancellationToken);
             return new CreateRequisitionResult(createdRequisition);
         }
     }

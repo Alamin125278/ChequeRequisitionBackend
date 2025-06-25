@@ -120,7 +120,13 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
 
     public async Task<UserDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var data = await _cRDBContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+        var data = await _cRDBContext.Users
+       .Include(x => x.Bank)
+       .Include(x => x.RoleNavigation)
+       .Include(x => x.Vendor)
+       .Include(x => x.Branch)
+       .FirstOrDefaultAsync(x => x.Id == id);
+
 
         return data?.Adapt<UserDto?>();
     }
