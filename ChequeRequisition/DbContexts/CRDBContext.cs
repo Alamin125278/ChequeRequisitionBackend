@@ -182,6 +182,8 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__ChallanD__3214EC0782D36941");
 
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+
             entity.HasOne(d => d.Challan).WithMany(p => p.ChallanDetails)
                 .HasForeignKey(d => d.ChallanId)
                 .HasConstraintName("FK__ChallanDe__Chall__6383C8BA");
@@ -201,6 +203,9 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.AccountNo)
                 .HasMaxLength(30)
                 .IsUnicode(false);
+            entity.Property(e => e.AgentNum)
+                .HasMaxLength(15)
+                .IsUnicode(false);
             entity.Property(e => e.ChequePrefix)
                 .HasMaxLength(10)
                 .IsUnicode(false);
@@ -215,6 +220,7 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.MicrNo)
                 .HasMaxLength(13)
                 .IsUnicode(false);
+            entity.Property(e => e.Remarks).HasColumnType("text");
             entity.Property(e => e.RoutingNo)
                 .HasMaxLength(10)
                 .IsUnicode(false);
@@ -364,13 +370,23 @@ public partial class CRDBContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.EndLimit)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.EndingNo)
+                .HasMaxLength(30)
+                .IsUnicode(false);
             entity.Property(e => e.Series)
-                .HasMaxLength(50)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.StartingNo)
+                .HasMaxLength(30)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.Bank).WithMany(p => p.SetSerialNumbers)
                 .HasForeignKey(d => d.BankId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SetSerialNumbers_Banks");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.SetSerialNumberCreatedByNavigations)

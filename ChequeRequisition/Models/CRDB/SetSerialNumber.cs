@@ -7,19 +7,19 @@ public partial class SetSerialNumber
 {
     public int Id { get; set; }
 
-    public int? BankId { get; set; }
+    public int BankId { get; set; }
 
-    public string? ChequeType { get; set; }
+    public string ChequeType { get; set; } = null!;
 
-    public int? TrCode { get; set; }
+    public int TrCode { get; set; }
 
-    public int? StartingNo { get; set; }
+    public string StartingNo { get; set; } = null!;
 
-    public int? EndNo { get; set; }
+    public string EndingNo { get; set; } = null!;
 
-    public int? EndingNo { get; set; }
+    public string EndLimit { get; set; } = null!;
 
-    public string? Series { get; set; }
+    public string Series { get; set; } = null!;
 
     public bool IsDelete { get; set; }
 
@@ -31,7 +31,7 @@ public partial class SetSerialNumber
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual Bank? Bank { get; set; }
+    public virtual Bank Bank { get; set; } = null!;
 
     public virtual User? CreatedByNavigation { get; set; }
 

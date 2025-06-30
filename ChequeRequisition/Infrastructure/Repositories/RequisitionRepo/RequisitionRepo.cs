@@ -2,6 +2,7 @@
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,10 +57,74 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
             return data.Adapt<IEnumerable<RequisitionDto>>();
         }
 
+        public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
+     int? Status, int? BankId, int? BranchId, int? Severity,
+     DateOnly? RequestDate, int Skip = 0, int Limit = 10,
+     string? Search = null, CancellationToken cancellationToken = default)
+        {
+            var data = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
+                .Include(x => x.Bank)
+                .Include(x => x.Branch)
+                .Include(x => x.ReceivingBranch)
+                .Include(x => x.StatusNavigation)
+                .Include(x => x.RequestedByNavigation)
+               .Where(x => string.IsNullOrEmpty(Search) || (x.AccountNo != null && x.AccountNo.Contains(Search)))
+                .Where(x => x.IsDeleted == false)
+                .Where(x => x.Status == Status || Status == null)
+                .Where(x => x.BankId == BankId || BankId == null)
+                .Where(x => x.BranchId == BranchId || BranchId == null)
+                .Where(x => x.Serverity == Severity || Severity == null)
+                .Where(x => x.RequestDate == RequestDate || RequestDate == null)
+                .Skip(Skip)
+                .Take(Limit)
+                .ToListAsync(cancellationToken);
+
+            return data.Adapt<IEnumerable<RequisitionDto>>();
+        }
+        public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
+     int? Status, int? BankId, int? BranchId, int? Severity,
+     DateOnly? RequestDate,
+     string? Search = null, CancellationToken cancellationToken = default)
+        {
+            var data = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
+                .Include(x => x.Bank)
+                .Include(x => x.Branch)
+                .Include(x => x.ReceivingBranch)
+                .Include(x => x.StatusNavigation)
+                .Include(x => x.RequestedByNavigation)
+               .Where(x => string.IsNullOrEmpty(Search) || (x.AccountNo != null && x.AccountNo.Contains(Search)))
+                .Where(x => x.IsDeleted == false)
+                .Where(x => x.Status == Status || Status == null)
+                .Where(x => x.BankId == BankId || BankId == null)
+                .Where(x => x.BranchId == BranchId || BranchId == null)
+                .Where(x => x.Serverity == Severity || Severity == null)
+                .Where(x => x.RequestDate == RequestDate || RequestDate == null)
+                .ToListAsync(cancellationToken);
+
+            return data.Adapt<IEnumerable<RequisitionDto>>();
+        }
+
         public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
+
+        public async Task<int> GetAllCountAsync(
+      int? Status, int? BankId, int? BranchId, int? Severity,
+      DateOnly? RequestDate, string? Search, CancellationToken cancellationToken = default)
+        {
+            var count = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
+                .Where(x => (x.AccountNo != null && x.AccountNo.Contains(Search)) || Search == null)
+                .Where(x => x.IsDeleted == false)
+                .Where(x=> x.Status==Status|| Status == null)
+                .Where(x => x.BankId == BankId || BankId == null)
+                .Where(x => x.BranchId == BranchId || BranchId == null)
+                .Where(x => x.Serverity == Severity || Severity == null)
+                .Where(x => x.RequestDate == RequestDate || RequestDate == null)
+                .CountAsync(cancellationToken);
+            return count;
+        }
+
 
         public async Task<RequisitionDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {

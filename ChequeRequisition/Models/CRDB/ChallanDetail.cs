@@ -11,6 +11,10 @@ public partial class ChallanDetail
 
     public int? ChallanId { get; set; }
 
+    public int CreatedBy { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
     public virtual Challan? Challan { get; set; }
 
     public virtual ChequeBookRequisition? RequisitionItem { get; set; }

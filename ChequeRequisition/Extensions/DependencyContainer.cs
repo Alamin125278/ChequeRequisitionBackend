@@ -4,6 +4,7 @@ using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.Core.Interfaces.Repositories.IUserRole;
 using ChequeRequisiontService.Core.Interfaces.Services.Auth;
 using ChequeRequisiontService.Core.Interfaces.Services.FtpServices;
+using ChequeRequisiontService.Infrastructure.Repositories;
 using ChequeRequisiontService.Infrastructure.Repositories.BankRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.BranchRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision;
@@ -50,5 +51,6 @@ public static class DependencyContainer
         services.AddScoped<IFtpLogDbService, FtpLogDbService>();
         services.AddScoped<IRequisitionTrackingRepo, RequisitionTrackingRepo>();
         services.AddScoped<ILocalFileUploadRepo, LocalFileUploadRepo>();
+        services.AddScoped<IChallanRepo, ChallanRepo>();
     }
 }

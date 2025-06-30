@@ -45,9 +45,15 @@ public partial class ChequeBookRequisition
 
     public DateOnly RequestDate { get; set; }
 
+    public string? AgentNum { get; set; }
+
+    public int? VendorId { get; set; }
+
     public int Serverity { get; set; }
 
     public int Status { get; set; }
+
+    public string? Remarks { get; set; }
 
     public bool IsDeleted { get; set; }
 
