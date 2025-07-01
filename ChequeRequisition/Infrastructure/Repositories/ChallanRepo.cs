@@ -80,6 +80,7 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                         AgentNum = requisition.AgentNum,
                         Item = new ChallanItemDto
                         {
+                            ItemId = requisition.Id,
                             AccountNo = requisition.AccountNo,
                             AccountName = requisition.AccountName,
                             StartNo = requisition.StartNo,

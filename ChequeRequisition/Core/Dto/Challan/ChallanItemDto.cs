@@ -3,6 +3,7 @@
 
 public class ChallanItemDto
 {
+    public int ItemId { get; set; }
     public required string AccountNo { get; set; }
     public required string AccountName { get; set; }
     public required string StartNo { get; set; }

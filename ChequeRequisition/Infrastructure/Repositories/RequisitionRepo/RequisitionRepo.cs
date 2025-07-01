@@ -1,16 +1,23 @@
-﻿using ChequeRequisiontService.Core.Dto.Requisition;
+﻿using ChequeRequisiontService.Core.Dto.Challan;
+using ChequeRequisiontService.Core.Dto.Requisition;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
 {
     public class RequisitionRepo(CRDBContext cRDBContext) : IRequisitonRepo
     {
         private readonly CRDBContext _cRDBContext= cRDBContext;
+        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            return _cRDBContext.Database.BeginTransactionAsync(cancellationToken);
+        }
         public async Task<RequisitionDto> CreateAsync(RequisitionDto entity, int UserId, CancellationToken cancellationToken = default)
         {
             try
@@ -159,6 +166,19 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
             }
             
 
+        }
+
+        public async Task<int> UpdateChequeListAsync(List<int> Items, int Status, int UserId, CancellationToken cancellationToken)
+        {
+            var updatedCount = await _cRDBContext.ChequeBookRequisitions
+        .Where(x => Items.Contains(x.Id) && x.IsDeleted == false)
+        .ExecuteUpdateAsync(setters => setters
+            .SetProperty(x => x.UpdatedAt, x => DateTime.UtcNow)
+            .SetProperty(x => x.UpdatedBy, x => UserId)
+            .SetProperty(x => x.Status, x => Status),
+            cancellationToken);
+
+            return updatedCount;
         }
     }
 }

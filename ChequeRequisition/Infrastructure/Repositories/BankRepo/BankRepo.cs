@@ -78,16 +78,10 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
 
         public async Task<IEnumerable<BankDto>> GetAllAsync(int? BankId, CancellationToken cancellationToken)
         {
-            var query = _cRDBContext.Banks.AsNoTracking()
+            var data = await _cRDBContext.Banks.AsNoTracking()
                  .Where(x=> x.Id==BankId || BankId==null)
                  .Where(x => x.IsDeleted == false)
-                 .Where(x => x.IsActive == true);
-            if (BankId !=null)
-            {
-                query = query.Where(x => x.Id == BankId);
-            }
-
-            var data = await query
+                 .Where(x => x.IsActive == true)
                 .ToListAsync(cancellationToken);
             return data.Adapt<IEnumerable<BankDto>>();
         }
