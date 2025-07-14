@@ -1,4 +1,5 @@
 ﻿using Carter;
+using ChequeRequisiontService.Core.Dto.Common;
 using MediatR;
 
 namespace ChequeRequisiontService.Endpoints.LocalFileUpload;
@@ -7,16 +8,24 @@ public class LocalFileUploadEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/local-file-upload", async (LocalFileUploadCommand command,ISender sender, CancellationToken cancellationToken) =>
+        app.MapPost("/api/local-file-upload/bulk", async (BulkLocalFileUploadCommand command, ISender sender, CancellationToken cancellationToken) =>
         {
             var result = await sender.Send(command, cancellationToken);
-            return result != null ? Results.Ok() : Results.BadRequest("Failed to upload the file.");
 
-        }).Accepts<LocalFileUploadCommand>("application/json")
+            var response = new ResponseDto<LocalFileUploadResult>
+            {
+                Message = result.IsSuccess ? "Successfully uploaded cheque items." : "Failed to upload cheque items.",
+                Data = result,
+                StatusCode = result.IsSuccess ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest
+            };
+
+            return Results.Json(response, statusCode: response.StatusCode);
+        })
+        .Accepts<BulkLocalFileUploadCommand>("application/json")
         .RequireAuthorization()
-         .WithName("LocalFileUpload")
-         .Produces<LocalFileUploadResult>(StatusCodes.Status200OK)
-         .Produces(StatusCodes.Status400BadRequest)
-          .WithTags("LocalFileUpload");
+        .WithName("BulkLocalFileUpload")
+        .Produces<ResponseDto<LocalFileUploadResult>>(StatusCodes.Status200OK)
+        .Produces<ResponseDto<LocalFileUploadResult>>(StatusCodes.Status400BadRequest)
+        .WithTags("LocalFileUpload");
     }
 }

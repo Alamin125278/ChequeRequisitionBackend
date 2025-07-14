@@ -28,6 +28,8 @@ public partial class CRDBContext : DbContext
 
     public virtual DbSet<ChequeBookRequisition> ChequeBookRequisitions { get; set; }
 
+    public virtual DbSet<Courier> Couriers { get; set; }
+
     public virtual DbSet<FtpFileShareLog> FtpFileShareLogs { get; set; }
 
     public virtual DbSet<FtpImport> FtpImports { get; set; }
@@ -164,18 +166,6 @@ public partial class CRDBContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-
-            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ChallanCreatedByNavigations)
-                .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__Challans__Create__5EBF139D");
-
-            entity.HasOne(d => d.ReceivingBranchNavigation).WithMany(p => p.Challans)
-                .HasForeignKey(d => d.ReceivingBranch)
-                .HasConstraintName("FK_Challans_Branches");
-
-            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.ChallanUpdatedByNavigations)
-                .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__Challans__Update__5FB337D6");
         });
 
         modelBuilder.Entity<ChallanDetail>(entity =>
@@ -183,10 +173,6 @@ public partial class CRDBContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__ChallanD__3214EC0782D36941");
 
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Challan).WithMany(p => p.ChallanDetails)
-                .HasForeignKey(d => d.ChallanId)
-                .HasConstraintName("FK__ChallanDe__Chall__6383C8BA");
 
             entity.HasOne(d => d.RequisitionItem).WithMany(p => p.ChallanDetails)
                 .HasForeignKey(d => d.RequisitionItemId)
@@ -263,6 +249,21 @@ public partial class CRDBContext : DbContext
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.ChequeBookRequisitionUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
                 .HasConstraintName("FK__ChequeBoo__Updat__571DF1D5");
+        });
+
+        modelBuilder.Entity<Courier>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Courier__3214EC07806CDF1C");
+
+            entity.Property(e => e.CourierCode).HasMaxLength(50);
+            entity.Property(e => e.CourierName).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<FtpFileShareLog>(entity =>

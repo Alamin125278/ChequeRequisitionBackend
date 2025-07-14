@@ -27,9 +27,11 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
         public required int Leaves { get; set; }
         public required int CourierCode { get; set; }
         public required int ReceivingBranchId { get; set; }
-        public required DateOnly RequestDate { get; set; }
+        public  string RequestDate { get; set; }
         public required int Serverity { get; set; }
         public string Remarks { get; set; } = string.Empty;
+        public string? AgentNum { get; set; }
+        public string? ChallanNumber { get; set; }
 
         public required int Status { get; set; } // Assuming 1 is the default status for a new requisition
         public bool IsDeleted { get; set; } = false;
@@ -45,5 +47,6 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
         public UserDto? RequestedByNavigation { get; set; }
         public string RequestName => RequestedByNavigation?.Name ?? string.Empty;
         public string ReceivingBranchName => ReceivingBranch?.BranchName ?? string.Empty;
+
     }
 }

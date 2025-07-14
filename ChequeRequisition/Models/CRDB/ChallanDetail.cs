@@ -15,7 +15,5 @@ public partial class ChallanDetail
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual Challan? Challan { get; set; }
-
     public virtual ChequeBookRequisition? RequisitionItem { get; set; }
 }

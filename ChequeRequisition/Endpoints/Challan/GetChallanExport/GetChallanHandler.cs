@@ -4,7 +4,7 @@ using ChequeRequisiontService.Core.Dto.Challan;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 
-namespace ChequeRequisiontService.Endpoints.Challan.GetChallan;
+namespace ChequeRequisiontService.Endpoints.Challan.GetChallanExport;
 public record GetChallanCommand(List<int> ChallanIds):ICommand<GetChallanResponse>;
 public record GetChallanResponse(List<ChallanExportDto> Challans);
 

@@ -12,7 +12,7 @@ public class GetAllForBranchHandler(IBankRepo bankRepo, AuthenticatedUserInfo au
     public async Task<GetAllForBranchResult> Handle(GetAllForBranchQuery request, CancellationToken cancellationToken)
     {
         var bankId = authenticatedUserInfo.BankId;
-        var banks = await _bankRepo.GetAllAsync(bankId, cancellationToken);
+        var banks = await _bankRepo.GetAllAsync(bankId,authenticatedUserInfo.VendorId, cancellationToken);
         return new GetAllForBranchResult(banks);
     }
 }

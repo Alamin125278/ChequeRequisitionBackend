@@ -16,7 +16,7 @@ public record GetAllByExportResult(
     IEnumerable<RequisitionDto> Requisitions
 );
 
-public class GetAllByExportHandler(IRequisitonRepo requisitonRepo) : IQueryHandler<GetAllByExportQuery, GetAllByExportResult>
+public class GetAllByExportHandler(IRequisitonRepo requisitonRepo,AuthenticatedUserInfo authenticatedUserInfo) : IQueryHandler<GetAllByExportQuery, GetAllByExportResult>
 {
     public async Task<GetAllByExportResult> Handle(GetAllByExportQuery request, CancellationToken cancellationToken)
     {
@@ -31,6 +31,7 @@ public class GetAllByExportHandler(IRequisitonRepo requisitonRepo) : IQueryHandl
             3,
             request.BankId,
             request.BranchId,
+            authenticatedUserInfo.VendorId,
             request.Severity,
             requestDate,
             request.Search,

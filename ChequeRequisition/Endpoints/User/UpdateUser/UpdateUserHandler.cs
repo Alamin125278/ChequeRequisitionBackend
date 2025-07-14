@@ -7,7 +7,7 @@ using Mapster;
 
 namespace ChequeRequisiontService.Endpoints.User.UpdateUser
 {
-    public record UpdateUserCommand(int Id, int? BankId, int? BranchId, int? VendorId, string Name, string Email, string UserName, string ImagePath, int Role, string? IsActive = null) : ICommand<UpdateUserResult>;
+    public record UpdateUserCommand(int Id, int? BankId, int? BranchId, int? VendorId, string Name, string Email, string UserName, int Role, string? ImagePath = null, string? IsActive = null) : ICommand<UpdateUserResult>;
    public record UpdateUserResult(UserDto User);
     public class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
     {
@@ -17,7 +17,6 @@ namespace ChequeRequisiontService.Endpoints.User.UpdateUser
             RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required.");
             RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Valid email is required.");
             RuleFor(x => x.UserName).NotEmpty().WithMessage("Username is required.");
-            RuleFor(x => x.ImagePath).NotEmpty().WithMessage("Image path is required.");
             RuleFor(x => x.Role).NotEmpty().WithMessage("Role is required.");
             RuleFor(x => x.IsActive).NotNull().WithMessage("IsActive is required.");
         }

@@ -3,7 +3,7 @@ using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChequeRequisiontService.Endpoints.Challan.GetChallan
+namespace ChequeRequisiontService.Endpoints.Challan.GetChallanExport
 {
     public class GetChallanEndpoint : ICarterModule
     {

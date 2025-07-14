@@ -51,10 +51,6 @@ public partial class User
 
     public virtual ICollection<Branch> BranchUpdatedByNavigations { get; set; } = new List<Branch>();
 
-    public virtual ICollection<Challan> ChallanCreatedByNavigations { get; set; } = new List<Challan>();
-
-    public virtual ICollection<Challan> ChallanUpdatedByNavigations { get; set; } = new List<Challan>();
-
     public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitionCreatedByNavigations { get; set; } = new List<ChequeBookRequisition>();
 
     public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitionRequestedByNavigations { get; set; } = new List<ChequeBookRequisition>();

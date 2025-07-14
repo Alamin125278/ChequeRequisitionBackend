@@ -5,9 +5,11 @@ using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Linq;
 
 namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
 {
@@ -65,50 +67,104 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
         }
 
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
-     int? Status, int? BankId, int? BranchId, int? Severity,
+     int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
      DateOnly? RequestDate, int Skip = 0, int Limit = 10,
      string? Search = null, CancellationToken cancellationToken = default)
         {
+            // Get all matching Requisition IDs by ChallanNumber if search exists
+            List<int> requisitionIdsFromChallan = new();
+
+            if (!string.IsNullOrEmpty(Search))
+            {
+                requisitionIdsFromChallan = await (
+                    from d in _cRDBContext.ChallanDetails
+                    join c in _cRDBContext.Challans on d.ChallanId equals c.Id
+                    where d.RequisitionItemId.HasValue &&
+                          c.ChallanNumber.Contains(Search)
+                    select d.RequisitionItemId.Value
+                ).Distinct().ToListAsync(cancellationToken);
+            }
+
+            // Now filter ChequeBookRequisitions
             var data = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
                 .Include(x => x.Bank)
                 .Include(x => x.Branch)
                 .Include(x => x.ReceivingBranch)
                 .Include(x => x.StatusNavigation)
                 .Include(x => x.RequestedByNavigation)
-               .Where(x => string.IsNullOrEmpty(Search) || (x.AccountNo != null && x.AccountNo.Contains(Search)))
+                .Where(x =>
+                    string.IsNullOrEmpty(Search) ||
+                    (x.AccountNo != null && x.AccountNo.Contains(Search)) ||
+                    requisitionIdsFromChallan.Contains(x.Id)
+                )
                 .Where(x => x.IsDeleted == false)
                 .Where(x => x.Status == Status || Status == null)
                 .Where(x => x.BankId == BankId || BankId == null)
                 .Where(x => x.BranchId == BranchId || BranchId == null)
                 .Where(x => x.Serverity == Severity || Severity == null)
                 .Where(x => x.RequestDate == RequestDate || RequestDate == null)
+                .Where(x => x.VendorId == VendorId || VendorId == null)
                 .Skip(Skip)
                 .Take(Limit)
                 .ToListAsync(cancellationToken);
 
-            return data.Adapt<IEnumerable<RequisitionDto>>();
+            // Map to DTO
+            var dtos = data.Adapt<List<RequisitionDto>>();
+
+            // Fetch ChallanNumbers if needed
+            var idsForChallan = dtos
+                .Where(x => x.Status is not (1 or 2 or 3))
+                .Select(x => x.Id)
+                .ToList();
+
+            if (idsForChallan.Any())
+            {
+                var challans = await (
+                    from d in _cRDBContext.ChallanDetails
+                    join c in _cRDBContext.Challans on d.ChallanId equals c.Id
+                    where d.RequisitionItemId.HasValue && idsForChallan.Contains(d.RequisitionItemId.Value)
+                    select new { d.RequisitionItemId, c.ChallanNumber }
+                ).ToListAsync(cancellationToken);
+
+                var challanMap = challans
+    .GroupBy(x => x.RequisitionItemId)
+    .ToDictionary(g => g.Key, g => g.First().ChallanNumber);
+
+                foreach (var dto in dtos)
+                {
+                    if (challanMap.TryGetValue(dto.Id, out var challanNo))
+                        dto.ChallanNumber = challanNo;
+                }
+            }
+
+            return dtos;
         }
+
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
-     int? Status, int? BankId, int? BranchId, int? Severity,
+     int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
      DateOnly? RequestDate,
      string? Search = null, CancellationToken cancellationToken = default)
         {
-            var data = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
-                .Include(x => x.Bank)
-                .Include(x => x.Branch)
-                .Include(x => x.ReceivingBranch)
-                .Include(x => x.StatusNavigation)
-                .Include(x => x.RequestedByNavigation)
-               .Where(x => string.IsNullOrEmpty(Search) || (x.AccountNo != null && x.AccountNo.Contains(Search)))
-                .Where(x => x.IsDeleted == false)
-                .Where(x => x.Status == Status || Status == null)
-                .Where(x => x.BankId == BankId || BankId == null)
-                .Where(x => x.BranchId == BranchId || BranchId == null)
-                .Where(x => x.Serverity == Severity || Severity == null)
-                .Where(x => x.RequestDate == RequestDate || RequestDate == null)
-                .ToListAsync(cancellationToken);
+            var requisitions = await _cRDBContext.ChequeBookRequisitions
+                                .AsNoTracking()
+                                .Include(x => x.Bank)
+                                .Include(x => x.Branch)
+                                .Include(x => x.ReceivingBranch)
+                                .Include(x => x.StatusNavigation)
+                                .Include(x => x.RequestedByNavigation)
+                                .Where(x => !x.IsDeleted)
+                                .Where(x => string.IsNullOrEmpty(Search) || x.AccountNo.Contains(Search))
+                                .Where(x => !Status.HasValue || x.Status == Status)
+                                .Where(x => !BankId.HasValue || x.BankId == BankId)
+                                .Where(x => !VendorId.HasValue || x.VendorId == VendorId)
+                                .Where(x => !BranchId.HasValue || x.BranchId == BranchId)
+                                .Where(x => !Severity.HasValue || x.Serverity == Severity)
+                                .Where(x => !RequestDate.HasValue || x.RequestDate == RequestDate)
+                                .ToListAsync(cancellationToken);
 
-            return data.Adapt<IEnumerable<RequisitionDto>>();
+            // Step 2: Map to DTO
+            var dtos = requisitions.Adapt<List<RequisitionDto>>();
+            return dtos;
         }
 
         public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
@@ -117,7 +173,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
         }
 
         public async Task<int> GetAllCountAsync(
-      int? Status, int? BankId, int? BranchId, int? Severity,
+      int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
       DateOnly? RequestDate, string? Search, CancellationToken cancellationToken = default)
         {
             var count = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
@@ -126,6 +182,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                 .Where(x=> x.Status==Status|| Status == null)
                 .Where(x => x.BankId == BankId || BankId == null)
                 .Where(x => x.BranchId == BranchId || BranchId == null)
+                .Where(x => x.VendorId == VendorId || VendorId == null)
                 .Where(x => x.Serverity == Severity || Severity == null)
                 .Where(x => x.RequestDate == RequestDate || RequestDate == null)
                 .CountAsync(cancellationToken);
@@ -170,15 +227,23 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
 
         public async Task<int> UpdateChequeListAsync(List<int> Items, int Status, int UserId, CancellationToken cancellationToken)
         {
-            var updatedCount = await _cRDBContext.ChequeBookRequisitions
-        .Where(x => Items.Contains(x.Id) && x.IsDeleted == false)
-        .ExecuteUpdateAsync(setters => setters
-            .SetProperty(x => x.UpdatedAt, x => DateTime.UtcNow)
-            .SetProperty(x => x.UpdatedBy, x => UserId)
-            .SetProperty(x => x.Status, x => Status),
-            cancellationToken);
+            try
+            {
+                var updatedCount = await _cRDBContext.ChequeBookRequisitions
+       .Where(x => Items.Contains(x.Id) && x.IsDeleted == false)
+       .ExecuteUpdateAsync(setters => setters
+           .SetProperty(x => x.UpdatedAt, x => DateTime.UtcNow)
+           .SetProperty(x => x.UpdatedBy, x => UserId)
+           .SetProperty(x => x.Status, x => Status),
+           cancellationToken);
 
-            return updatedCount;
+                return updatedCount;
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception("Database update error: " + (ex.InnerException?.Message ?? ex.Message), ex);
+            }
+
         }
     }
 }

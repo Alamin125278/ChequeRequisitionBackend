@@ -33,6 +33,7 @@ namespace ChequeRequisiontService.Endpoints.Bank.UpdateBank
 
             var bank = request.Adapt<BankDto>();
             bank.IsActive = activeStatus;
+            bank.VendorId = request.VendorId;
             var id = request.Id;
             
             var updatedBank = await _bankRepo.UpdateAsync(bank, id, authenticatedUserInfo.Id, cancellationToken);

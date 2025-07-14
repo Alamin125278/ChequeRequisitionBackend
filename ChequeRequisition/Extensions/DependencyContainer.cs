@@ -4,14 +4,15 @@ using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.Core.Interfaces.Repositories.IUserRole;
 using ChequeRequisiontService.Core.Interfaces.Services.Auth;
 using ChequeRequisiontService.Core.Interfaces.Services.FtpServices;
-using ChequeRequisiontService.Infrastructure.Repositories;
 using ChequeRequisiontService.Infrastructure.Repositories.BankRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.BranchRepo;
+using ChequeRequisiontService.Infrastructure.Repositories.ChallanRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision;
 using ChequeRequisiontService.Infrastructure.Repositories.FtpImportExcel;
 using ChequeRequisiontService.Infrastructure.Repositories.LocalFileUploadRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.MenuRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo;
+using ChequeRequisiontService.Infrastructure.Repositories.SummaryReportRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.UploadImageRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.UserMenuPermissionRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.UserRepo;
@@ -52,5 +53,6 @@ public static class DependencyContainer
         services.AddScoped<IRequisitionTrackingRepo, RequisitionTrackingRepo>();
         services.AddScoped<ILocalFileUploadRepo, LocalFileUploadRepo>();
         services.AddScoped<IChallanRepo, ChallanRepo>();
+        services.AddScoped<ISummaryReport, SummaryReportRepo>();
     }
 }

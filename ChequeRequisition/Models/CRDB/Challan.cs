@@ -20,12 +20,4 @@ public partial class Challan
     public int? UpdatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-
-    public virtual ICollection<ChallanDetail> ChallanDetails { get; set; } = new List<ChallanDetail>();
-
-    public virtual User? CreatedByNavigation { get; set; }
-
-    public virtual Branch? ReceivingBranchNavigation { get; set; }
-
-    public virtual User? UpdatedByNavigation { get; set; }
 }

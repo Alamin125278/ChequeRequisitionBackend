@@ -35,8 +35,6 @@ public partial class Branch
 
     public virtual Bank? Bank { get; set; }
 
-    public virtual ICollection<Challan> Challans { get; set; } = new List<Challan>();
-
     public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitionBranches { get; set; } = new List<ChequeBookRequisition>();
 
     public virtual ICollection<ChequeBookRequisition> ChequeBookRequisitionReceivingBranches { get; set; } = new List<ChequeBookRequisition>();

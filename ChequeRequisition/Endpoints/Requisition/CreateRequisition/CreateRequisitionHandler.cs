@@ -41,7 +41,7 @@ namespace ChequeRequisiontService.Endpoints.Requisition.CreateRequisition
         {
             
             var requisition = request.Adapt<RequisitionDto>();
-            requisition.RequestDate = DateOnly.Parse(request.RequestDate);
+            //requisition.RequestDate = DateOnly.Parse(request.RequestDate);
 
 
             var createdRequisition = await _requisitonRepo.CreateAsync(requisition, authenticatedUserInfo.Id, cancellationToken);
