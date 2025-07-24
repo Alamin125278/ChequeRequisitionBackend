@@ -10,7 +10,7 @@ public class GetAllOrderRequisitionEndpoint:ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         app.MapGet("/api/requisition/get-all-order-requisitions", async (
-            int status,
+            int? status,
     int? bankId ,
     int? branchId ,
     int? severity,

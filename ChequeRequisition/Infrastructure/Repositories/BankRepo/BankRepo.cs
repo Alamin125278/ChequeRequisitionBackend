@@ -56,6 +56,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
                 .Where(x => x.IsDeleted == false)
                 .Skip(Skip)
                 .Take(Limit)
+                .OrderByDescending(x=>x.Id)
                 .ToListAsync(cancellationToken);
             return data.Adapt<IEnumerable<BankDto>>();
         }
@@ -72,6 +73,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
             var data = await query
                 .Skip(Skip)
                 .Take(Limit)
+                .OrderByDescending(x => x.Id)
                 .ToListAsync(cancellationToken);
             return data.Adapt<IEnumerable<BankDto>>();
         }
@@ -83,6 +85,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BankRepo
                  .Where(x => x.VendorId == VendorId || VendorId == null)
                  .Where(x => x.IsDeleted == false)
                  .Where(x => x.IsActive == true)
+                 .OrderByDescending(x => x.Id)
                 .ToListAsync(cancellationToken);
             return data.Adapt<IEnumerable<BankDto>>();
         }

@@ -198,6 +198,9 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.ChequeType)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            entity.Property(e => e.CourierCode)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CusAddress).HasColumnType("text");
             entity.Property(e => e.EndNo)

@@ -69,12 +69,13 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                     join reBranch in _cRDBContext.Branches on challan.ReceivingBranch equals reBranch.Id
                     join bank in _cRDBContext.Banks on requisition.BankId equals bank.Id
                     join vendor in _cRDBContext.Vendors on requisition.VendorId equals vendor.Id
+                    join courier in _cRDBContext.Couriers on requisition.CourierCode equals courier.CourierCode
                     where challanIds.Contains(challan.Id)
                     select new
                     {
                         challan.ChallanNumber,
                         challan.ChallanDate,
-                        CourierName = "Pathao",
+                        courier.CourierName,
                         bank.BankName,
                         vendor.VendorName,
                         HomeBranchName = homeBranch.BranchName,
@@ -138,7 +139,7 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                     join reBranch in _cRDBContext.Branches on challan.ReceivingBranch equals reBranch.Id
                     join bank in _cRDBContext.Banks on requisition.BankId equals bank.Id
                     join vendor in _cRDBContext.Vendors on requisition.VendorId equals vendor.Id
-                    join courier in _cRDBContext.Couriers on requisition.CourierCode equals courier.Id
+                    join courier in _cRDBContext.Couriers on requisition.CourierCode equals courier.CourierCode
                     where
                         (BankId == null || requisition.BankId == BankId) &&
                         (BranchId == null || challan.ReceivingBranch == BranchId) &&
@@ -160,6 +161,7 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                     };
 
         var data = await query
+            .OrderByDescending(x => x.ChallanDate)
             .Skip(Skip)
             .Take(Limit)
             .ToListAsync(cancellationToken);

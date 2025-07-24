@@ -94,7 +94,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                 .Include(x => x.RequestedByNavigation)
                 .Where(x =>
                     string.IsNullOrEmpty(Search) ||
-                    (x.AccountNo != null && x.AccountNo.Contains(Search)) ||
+                    (x.AccountNo != null && x.AccountNo.Contains(Search)) ||x.AccountName.Contains(Search)||
                     requisitionIdsFromChallan.Contains(x.Id)
                 )
                 .Where(x => x.IsDeleted == false)
@@ -104,6 +104,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                 .Where(x => x.Serverity == Severity || Severity == null)
                 .Where(x => x.RequestDate == RequestDate || RequestDate == null)
                 .Where(x => x.VendorId == VendorId || VendorId == null)
+                .OrderByDescending(x => x.Id)
                 .Skip(Skip)
                 .Take(Limit)
                 .ToListAsync(cancellationToken);
@@ -153,7 +154,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                                 .Include(x => x.StatusNavigation)
                                 .Include(x => x.RequestedByNavigation)
                                 .Where(x => !x.IsDeleted)
-                                .Where(x => string.IsNullOrEmpty(Search) || x.AccountNo.Contains(Search))
+                                .Where(x => string.IsNullOrEmpty(Search) || x.AccountNo.Contains(Search)||x.AccountName.Contains(Search))
                                 .Where(x => !Status.HasValue || x.Status == Status)
                                 .Where(x => !BankId.HasValue || x.BankId == BankId)
                                 .Where(x => !VendorId.HasValue || x.VendorId == VendorId)
@@ -176,17 +177,35 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
       int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
       DateOnly? RequestDate, string? Search, CancellationToken cancellationToken = default)
         {
-            var count = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
-                .Where(x => (x.AccountNo != null && x.AccountNo.Contains(Search)) || Search == null)
-                .Where(x => x.IsDeleted == false)
-                .Where(x=> x.Status==Status|| Status == null)
-                .Where(x => x.BankId == BankId || BankId == null)
-                .Where(x => x.BranchId == BranchId || BranchId == null)
-                .Where(x => x.VendorId == VendorId || VendorId == null)
-                .Where(x => x.Serverity == Severity || Severity == null)
-                .Where(x => x.RequestDate == RequestDate || RequestDate == null)
-                .CountAsync(cancellationToken);
-            return count;
+            List<int> requisitionIdsFromChallan = new();
+
+            if (!string.IsNullOrEmpty(Search))
+            {
+                requisitionIdsFromChallan = await (
+                    from d in _cRDBContext.ChallanDetails
+                    join c in _cRDBContext.Challans on d.ChallanId equals c.Id
+                    where d.RequisitionItemId.HasValue &&
+                          c.ChallanNumber.Contains(Search)
+                    select d.RequisitionItemId.Value
+                ).Distinct().ToListAsync(cancellationToken);
+            }
+
+            var query = _cRDBContext.ChequeBookRequisitions.AsNoTracking()
+                .Where(x =>
+                    string.IsNullOrEmpty(Search) ||
+                    (x.AccountNo != null && x.AccountNo.Contains(Search)) ||
+                    x.AccountName.Contains(Search) ||
+                    requisitionIdsFromChallan.Contains(x.Id)
+                )
+                .Where(x => !x.IsDeleted)
+                .Where(x => !Status.HasValue || x.Status == Status)
+                .Where(x => !BankId.HasValue || x.BankId == BankId)
+                .Where(x => !BranchId.HasValue || x.BranchId == BranchId)
+                .Where(x => !Severity.HasValue || x.Serverity == Severity)
+                .Where(x => !RequestDate.HasValue || x.RequestDate == RequestDate)
+                .Where(x => !VendorId.HasValue || x.VendorId == VendorId);
+
+            return await query.CountAsync(cancellationToken);
         }
 
 

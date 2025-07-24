@@ -53,6 +53,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
                 .Where(x => x.IsDeleted == false)
                 .Skip(Skip)
                 .Take(Limit)
+                .OrderByDescending(x => x.Id)
                 .ToListAsync(cancellationToken);
 
             return data.Adapt<IEnumerable<BranchDto>>();
@@ -70,6 +71,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
                .Where(x => x.BankId == BankId || BankId == null);
 
             var data = await query
+                .OrderByDescending(x => x.Id)
                 .Skip(Skip)
                 .Take(Limit)
                 .ToListAsync(cancellationToken);
@@ -83,7 +85,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
                .Where(x => x.IsActive == true)
                .Where(x => x.BankId == BankId || BankId == null);
 
-            var data = await query.ToListAsync(cancellationToken);
+            var data = await query.OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
             return data.Adapt<IEnumerable<BranchDto>>();
         }
         public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)

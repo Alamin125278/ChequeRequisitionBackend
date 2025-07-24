@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.LocalFileUpload;
 
-public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,int CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum) :ICommand<LocalFileUploadResult>;
+public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,string CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum) :ICommand<LocalFileUploadResult>;
 
 public record BulkLocalFileUploadCommand(List<LocalFileUploadCommand> Items) : ICommand<LocalFileUploadResult>;
 

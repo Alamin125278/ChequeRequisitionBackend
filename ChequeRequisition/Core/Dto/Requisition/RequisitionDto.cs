@@ -25,7 +25,7 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
         public required int BookQty { get; set; }
         public required int TransactionCode { get; set; }
         public required int Leaves { get; set; }
-        public required int CourierCode { get; set; }
+        public required string CourierCode { get; set; }
         public required int ReceivingBranchId { get; set; }
         public  string RequestDate { get; set; }
         public required int Serverity { get; set; }

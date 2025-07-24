@@ -39,7 +39,7 @@ public partial class ChequeBookRequisition
 
     public int Leaves { get; set; }
 
-    public int CourierCode { get; set; }
+    public string CourierCode { get; set; } = null!;
 
     public int ReceivingBranchId { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using Carter;
 using ChequeRequisiontService.Core.Dto.Common;
+using FluentValidation;
 using MediatR;
 
 namespace ChequeRequisiontService.Endpoints.SummaryReport;
@@ -8,11 +9,11 @@ public class SummaryReportEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-       app.MapGet("/api/summary-report", async (int bankId,string startDate,string endDate, ISender sender, CancellationToken cancellationToken) =>
+       app.MapGet("/api/summary-report", async (int bankId,string startDate,string endDate,int severity, ISender sender, CancellationToken cancellationToken) =>
        {
            try
            {
-               var result = await sender.Send(new GetSummaryReportQuery(bankId, startDate, endDate), cancellationToken);
+               var result = await sender.Send(new GetSummaryReportQuery(bankId, startDate, endDate, severity), cancellationToken);
 
                return Results.Ok(new ResponseDto<GetSummaryReportRes>
                {

@@ -77,7 +77,7 @@ public class ExcelParserService(IBranchRepo branchRepo,IBankRepo bankRepo) : IEx
                         TransactionCode = int.Parse(row.Cell(11).GetString()),
                         Leaves = Leaves,
                         VendorId=banks?.VendorId ?? 0,
-                        CourierCode = 1,
+                        CourierCode = "SCS",
                         ReceivingBranchId = receivingBranchId,
                         RequestDate = DateOnly.ParseExact(row.Cell(14).GetString(), "dd-MM-yyyy", CultureInfo.InvariantCulture),
                         Serverity = 1,

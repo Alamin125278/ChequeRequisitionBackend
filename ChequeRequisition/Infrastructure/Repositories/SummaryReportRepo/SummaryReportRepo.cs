@@ -10,7 +10,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
 {
     private CRDBContext _cRDBContext = cRDBContext;
-    public async Task<IEnumerable<SummaryReportDto>> GetSummaryReportAsync(int BankId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<SummaryReportDto>> GetSummaryReportAsync(int BankId, DateOnly fromDate, DateOnly toDate,int Severity, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -19,7 +19,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                         join requisition in _cRDBContext.ChequeBookRequisitions on tracking.RequisitionItemId equals requisition.Id
                         join homeBranch in _cRDBContext.Branches on requisition.BranchId equals homeBranch.Id
                         join deliveryBranch in _cRDBContext.Branches on requisition.ReceivingBranchId equals deliveryBranch.Id
-                        where requisition.BankId == BankId && challan.ChallanDate >= fromDate && challan.ChallanDate <= toDate
+                        where  requisition.Serverity==Severity && requisition.BankId == BankId && challan.ChallanDate >= fromDate && challan.ChallanDate <= toDate
                         group new { requisition, challan, homeBranch, deliveryBranch } by new
                         {
                             challan.ChallanNumber,

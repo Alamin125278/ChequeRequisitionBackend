@@ -1,12 +1,14 @@
 ﻿using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.User;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
+using ChequeRequisiontService.Core.Interfaces.Repositories.Dashboard;
 using ChequeRequisiontService.Core.Interfaces.Repositories.IUserRole;
 using ChequeRequisiontService.Core.Interfaces.Services.Auth;
 using ChequeRequisiontService.Core.Interfaces.Services.FtpServices;
 using ChequeRequisiontService.Infrastructure.Repositories.BankRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.BranchRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.ChallanRepo;
+using ChequeRequisiontService.Infrastructure.Repositories.Dashboard;
 using ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision;
 using ChequeRequisiontService.Infrastructure.Repositories.FtpImportExcel;
 using ChequeRequisiontService.Infrastructure.Repositories.LocalFileUploadRepo;
@@ -54,5 +56,6 @@ public static class DependencyContainer
         services.AddScoped<ILocalFileUploadRepo, LocalFileUploadRepo>();
         services.AddScoped<IChallanRepo, ChallanRepo>();
         services.AddScoped<ISummaryReport, SummaryReportRepo>();
+        services.AddScoped<IDashboardRepo, DashboardRepo>();
     }
 }

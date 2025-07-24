@@ -5,7 +5,7 @@ using ChequeRequisiontService.Core.Interfaces.Repositories;
 
 namespace ChequeRequisiontService.Endpoints.Requisition.GetAllOrderRequisition;
 public record GetAllOrderRequisitionQuery(
-    int Status,
+    int? Status,
     int? BankId = null,
     int? BranchId = null,
     int? Severity = null,
