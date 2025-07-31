@@ -80,7 +80,9 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                         vendor.VendorName,
                         HomeBranchName = homeBranch.BranchName,
                         ChallanBranchName = reBranch.BranchName,
+                        requisition.CusAddress,
                         requisition.AgentNum,
+                        requisition.IsAgent,
                         Item = new ChallanItemDto
                         {
                             ItemId = requisition.Id,
@@ -109,6 +111,8 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
         VendorName = g.First().VendorName,
         ReceivingBranchName = g.First().ChallanBranchName,
         AgentNum = g.First().AgentNum,
+        CusAddress = g.First().CusAddress,
+        IsAgent = g.First().IsAgent??false,
         Items = g.Select(x => x.Item).ToList()
     })
     .ToList();

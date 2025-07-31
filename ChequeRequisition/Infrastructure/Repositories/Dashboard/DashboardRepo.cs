@@ -10,13 +10,16 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.Dashboard
     public class DashboardRepo(CRDBContext cRDBContext) : IDashboardRepo
     {
         private readonly CRDBContext _cRDBContext = cRDBContext;
-        public async Task<int> GetAllCountAsync(int? Status, int? BankId, int? BranchId, int? VendorId, CancellationToken cancellationToken = default)
+        public async Task<int> GetAllCountAsync(int? Status, int? BankId, int? BranchId, int? VendorId, DateOnly? StartDate, DateOnly? EndDate, CancellationToken cancellationToken = default)
         {
             var count = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
-                .Where(x => (BankId == null || x.BankId == BankId) &&
+                .Where(x =>
+                            (BankId == null || x.BankId == BankId) &&
                             (BranchId == null || x.BranchId == BranchId) &&
                             (Status == null || x.Status == Status) &&
-                            (VendorId == null || x.VendorId == VendorId))
+                            (VendorId == null || x.VendorId == VendorId) &&
+                            x.RequestDate >= StartDate &&
+                            x.RequestDate <= EndDate)
                 .CountAsync(cancellationToken);
             return count;
         }

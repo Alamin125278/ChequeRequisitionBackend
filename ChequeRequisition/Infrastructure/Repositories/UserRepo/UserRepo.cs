@@ -3,6 +3,7 @@ using ChequeRequisiontService.Core.Dto.User;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -143,21 +144,26 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
     {
         try
         {
-            var user = await _cRDBContext.Users.FirstOrDefaultAsync(x => x.Id == Id);
-            if (user == null)
-            {
-                throw new NotFoundException("User not found");
-            }
+            var user = await _cRDBContext.Users.FirstOrDefaultAsync(x => x.Id == Id) ?? throw new NotFoundException("User not found");
             var existingPasswordHash = user.PasswordHash;
-            var data = entity.Adapt(user);
-            data.UpdatedAt = DateTime.UtcNow;
-            data.PasswordHash = existingPasswordHash;
-            data.UpdatedBy = UserId;
+            user.Name = entity.Name ?? user.Name;
+            user.Email = entity.Email ?? user.Email;
+            user.UserName = entity.UserName ?? user.UserName;
+            user.ImagePath = entity.ImagePath ?? user.ImagePath;
+            user.Role = entity.Role ?? user.Role;
+            user.IsActive = entity.IsActive ?? user.IsActive;
+            user.BankId = entity.BankId ?? user.BankId;
+            user.BranchId = entity.BranchId ?? user.BranchId;
+            user.VendorId = entity.VendorId ?? user.VendorId;
+
+            user.UpdatedAt = DateTime.UtcNow;
+            user.PasswordHash = existingPasswordHash;
+            user.UpdatedBy = UserId;
             var result = await _cRDBContext.SaveChangesAsync(cancellationToken);
 
             if (result > 0)
             {
-                return data.Adapt<UserDto>();
+                return user.Adapt<UserDto>();
             }
 
             throw new Exception("Failed to update user");

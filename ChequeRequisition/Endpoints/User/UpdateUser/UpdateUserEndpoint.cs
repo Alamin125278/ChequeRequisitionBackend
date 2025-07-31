@@ -1,5 +1,6 @@
 ﻿
 using Carter;
+using ChequeRequisiontService.Core.Dto.Common;
 using MediatR;
 
 namespace ChequeRequisiontService.Endpoints.User.UpdateUser
@@ -17,7 +18,14 @@ namespace ChequeRequisiontService.Endpoints.User.UpdateUser
                     return Results.BadRequest("Mismatched user ID");
                 }
                 var result = await sender.Send(command, cancellationToken);
-                return Results.Ok(result);
+                var response = new ResponseDto<UpdateUserResult>
+                {
+                    Success =true,
+                    Message = "Update User Successfully",
+                    StatusCode = 202,
+                    Data=result
+                };
+                return Results.Ok(response);
             }).WithName("UpdateUser")
               .WithTags("User")
               .RequireAuthorization()

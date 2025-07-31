@@ -16,7 +16,7 @@ public class LocalFileUploadEndpoint : ICarterModule
             {
                 Message = result.IsSuccess ? "Successfully uploaded cheque items." : "Failed to upload cheque items.",
                 Data = result,
-                StatusCode = result.IsSuccess ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest
+                StatusCode = StatusCodes.Status200OK 
             };
 
             return Results.Json(response, statusCode: response.StatusCode);
@@ -25,7 +25,6 @@ public class LocalFileUploadEndpoint : ICarterModule
         .RequireAuthorization()
         .WithName("BulkLocalFileUpload")
         .Produces<ResponseDto<LocalFileUploadResult>>(StatusCodes.Status200OK)
-        .Produces<ResponseDto<LocalFileUploadResult>>(StatusCodes.Status400BadRequest)
         .WithTags("LocalFileUpload");
     }
 }

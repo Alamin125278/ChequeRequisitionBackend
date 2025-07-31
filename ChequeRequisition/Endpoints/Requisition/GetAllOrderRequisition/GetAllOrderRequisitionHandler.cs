@@ -10,6 +10,7 @@ public record GetAllOrderRequisitionQuery(
     int? BranchId = null,
     int? Severity = null,
     string? RequestDate = null,
+    bool? IsAgent = null,
     int Skip = 0,
     int Limit = 10,
     string? Search = null
@@ -49,8 +50,9 @@ public class GetAllOrderRequisitionHandler(
         {
             branchId = request.BranchId;
         }
+        Console.WriteLine($"IsAgent from request: {request.IsAgent}");
 
-            var requisitions = await requisitionRepo.GetAllAsync(request.Status, bankId, branchId, authenticatedUserInfo.VendorId, request.Severity, requestDate, request.Skip, request.Limit, request.Search, cancellationToken);
+            var requisitions = await requisitionRepo.GetAllAsync(request.Status, bankId, branchId, authenticatedUserInfo.VendorId, request.Severity, requestDate,request.IsAgent, request.Skip, request.Limit, request.Search, cancellationToken);
         var totalCount = await requisitionRepo.GetAllCountAsync(
             request.Status,
             bankId,
@@ -59,6 +61,7 @@ public class GetAllOrderRequisitionHandler(
             request.Severity,
             requestDate,
             request.Search,
+            request.IsAgent,
             cancellationToken
         );
         return new GetAllOrderRequisitionResult(requisitions, totalCount);

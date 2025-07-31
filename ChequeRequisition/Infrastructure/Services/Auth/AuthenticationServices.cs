@@ -24,13 +24,13 @@ public class AuthenticationServices(IUserRepo userRepo, IPasswordHasher<UserDto>
 
         if(data == null || data.IsActive == false)
         {
-            throw new NotFoundException("User not found or inactive");
+            throw new NotFoundException("User account not found or is currently inactive.");
         }
 
          var result = _passwordHasher.VerifyHashedPassword(data, data?.PasswordHash, Password);
         if (result == PasswordVerificationResult.Failed)
         {
-            throw new UnauthorizedAccessException("Invalid password");
+            throw new UnauthorizedAccessException("Incorrect password. Make sure your credentials are correct.");
         }
 
         var credentials = new SigningCredentials(
@@ -63,5 +63,21 @@ public class AuthenticationServices(IUserRepo userRepo, IPasswordHasher<UserDto>
         return claims;
     }
 
+    public async Task<bool> ValidateTokenAsync(string token, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
 
+            if (jwt.ValidTo < DateTime.UtcNow)
+                return false;
+
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }

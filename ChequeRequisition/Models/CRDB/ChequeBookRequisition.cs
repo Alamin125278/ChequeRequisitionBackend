@@ -53,6 +53,8 @@ public partial class ChequeBookRequisition
 
     public int Status { get; set; }
 
+    public bool? IsAgent { get; set; }
+
     public string? Remarks { get; set; }
 
     public bool IsDeleted { get; set; }

@@ -15,11 +15,12 @@ public class GetAllOrderRequisitionEndpoint:ICarterModule
     int? branchId ,
     int? severity,
     string? requestDate,
-    int? skip,
+    bool ? isAgent,
+    int ? skip,
     int? limit ,
     string? search, ISender sender, CancellationToken cancellationToken) =>
         {
-            var result = await sender.Send(new GetAllOrderRequisitionQuery(status,bankId,branchId,severity,requestDate,skip ??0,limit ?? 10,search), cancellationToken);
+            var result = await sender.Send(new GetAllOrderRequisitionQuery(status,bankId,branchId,severity,requestDate,isAgent,skip ??0,limit ?? 10,search), cancellationToken);
             var response = result.Adapt<GetAllOrderRequisitionResult>();
             return Results.Ok(response);
         })

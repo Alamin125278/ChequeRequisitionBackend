@@ -32,6 +32,7 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
         public string Remarks { get; set; } = string.Empty;
         public string? AgentNum { get; set; }
         public string? ChallanNumber { get; set; }
+        public bool IsAgent { get; set; } = false;
 
         public required int Status { get; set; } // Assuming 1 is the default status for a new requisition
         public bool IsDeleted { get; set; } = false;

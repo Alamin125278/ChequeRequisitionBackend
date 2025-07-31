@@ -17,7 +17,11 @@ public class OrderStatusTrackingHandler(IDashboardRepo dashboardRepo, Authentica
 
         var today = DateTime.Today;
 
-        if (request.TimeRange == "week")
+        if (request.TimeRange == "today")
+        {
+            startDate = DateOnly.FromDateTime(DateTime.Today);
+        }
+        else if (request.TimeRange == "week")
         {
             int diff = (int)today.DayOfWeek;
             startDate = DateOnly.FromDateTime(today.AddDays(-diff));

@@ -1,6 +1,7 @@
 ﻿using ChequeRequisiontService.Core.Dto.SummaryReport;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 
@@ -10,7 +11,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
 {
     private CRDBContext _cRDBContext = cRDBContext;
-    public async Task<IEnumerable<SummaryReportDto>> GetSummaryReportAsync(int BankId, DateOnly fromDate, DateOnly toDate,int Severity, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<SummaryReportDto>> GetSummaryReportAsync(int BankId, DateOnly fromDate, DateOnly toDate,int Severity,bool AgentType, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -19,13 +20,14 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                         join requisition in _cRDBContext.ChequeBookRequisitions on tracking.RequisitionItemId equals requisition.Id
                         join homeBranch in _cRDBContext.Branches on requisition.BranchId equals homeBranch.Id
                         join deliveryBranch in _cRDBContext.Branches on requisition.ReceivingBranchId equals deliveryBranch.Id
-                        where  requisition.Serverity==Severity && requisition.BankId == BankId && challan.ChallanDate >= fromDate && challan.ChallanDate <= toDate
+                        where  requisition.IsAgent==AgentType && requisition.Serverity==Severity && requisition.BankId == BankId && challan.ChallanDate >= fromDate && challan.ChallanDate <= toDate
                         group new { requisition, challan, homeBranch, deliveryBranch } by new
                         {
                             challan.ChallanNumber,
                             challan.ChallanDate,
                             HomeBranchName = homeBranch.BranchName,
-                            DeliveryBranchName = deliveryBranch.BranchName
+                            DeliveryBranchName = deliveryBranch.BranchName,
+                            isAgent =requisition.IsAgent
                         } into g
                         orderby g.Key.ChallanNumber
                         select new SummaryReportDto
@@ -34,6 +36,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             DeliveryBranch = g.Key.DeliveryBranchName,
                             ChallanNo = g.Key.ChallanNumber,
                             ChallanDate = (DateOnly)(g.Key.ChallanDate),
+                            IsAgent =g.Key.isAgent??false,
 
                             Sb10 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 10 ? x.requisition.BookQty : 0),
                             Sb20 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 20 ? x.requisition.BookQty : 0),

@@ -68,7 +68,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
 
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
      int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
-     DateOnly? RequestDate, int Skip = 0, int Limit = 10,
+     DateOnly? RequestDate, bool? IsAgent = null, int Skip = 0, int Limit = 10,
      string? Search = null, CancellationToken cancellationToken = default)
         {
             // Get all matching Requisition IDs by ChallanNumber if search exists
@@ -103,6 +103,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                 .Where(x => x.BranchId == BranchId || BranchId == null)
                 .Where(x => x.Serverity == Severity || Severity == null)
                 .Where(x => x.RequestDate == RequestDate || RequestDate == null)
+                .Where(x => IsAgent == null || x.IsAgent == IsAgent)
                 .Where(x => x.VendorId == VendorId || VendorId == null)
                 .OrderByDescending(x => x.Id)
                 .Skip(Skip)
@@ -144,7 +145,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
      int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
      DateOnly? RequestDate,
-     string? Search = null, CancellationToken cancellationToken = default)
+     string? Search = null,bool? IsAgent=null, CancellationToken cancellationToken = default)
         {
             var requisitions = await _cRDBContext.ChequeBookRequisitions
                                 .AsNoTracking()
@@ -160,6 +161,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                                 .Where(x => !VendorId.HasValue || x.VendorId == VendorId)
                                 .Where(x => !BranchId.HasValue || x.BranchId == BranchId)
                                 .Where(x => !Severity.HasValue || x.Serverity == Severity)
+                                .Where(x => IsAgent == null || x.IsAgent == IsAgent)
                                 .Where(x => !RequestDate.HasValue || x.RequestDate == RequestDate)
                                 .ToListAsync(cancellationToken);
 
@@ -175,7 +177,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
 
         public async Task<int> GetAllCountAsync(
       int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
-      DateOnly? RequestDate, string? Search, CancellationToken cancellationToken = default)
+      DateOnly? RequestDate, string? Search, bool? IsAgent = null, CancellationToken cancellationToken = default)
         {
             List<int> requisitionIdsFromChallan = new();
 
@@ -203,6 +205,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
                 .Where(x => !BranchId.HasValue || x.BranchId == BranchId)
                 .Where(x => !Severity.HasValue || x.Serverity == Severity)
                 .Where(x => !RequestDate.HasValue || x.RequestDate == RequestDate)
+                .Where(x => IsAgent == null || x.IsAgent == IsAgent)
                 .Where(x => !VendorId.HasValue || x.VendorId == VendorId);
 
             return await query.CountAsync(cancellationToken);

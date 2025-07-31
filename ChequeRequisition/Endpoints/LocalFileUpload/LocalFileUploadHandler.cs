@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.LocalFileUpload;
 
-public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,string CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum) :ICommand<LocalFileUploadResult>;
+public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,string CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum,string HomeBranchCode,string DeliveryBranchCode,Boolean IsAgent) :ICommand<LocalFileUploadResult>;
 
 public record BulkLocalFileUploadCommand(List<LocalFileUploadCommand> Items) : ICommand<LocalFileUploadResult>;
 
@@ -90,10 +90,10 @@ public class BulkLocalFileUploadHandler(
         {
          
 
-            int branchId = await branchRepo.GetIdAsync(item.BankId, item.BranchName, cancellationToken);
+            int branchId = await branchRepo.GetIdAsync(item.BankId, item.HomeBranchCode, cancellationToken);
             if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
 
-            int receivingBranchId = await branchRepo.GetIdAsync(item.BankId, item.ReceivingBranchName, cancellationToken);
+            int receivingBranchId = await branchRepo.GetIdAsync(item.BankId, item.DeliveryBranchCode, cancellationToken);
             if (receivingBranchId == 0) return new LocalFileUploadResult(false, $"Receiving branch '{item.ReceivingBranchName}' not found.");
 
             var dto = item.Adapt<RequisitionDto>();

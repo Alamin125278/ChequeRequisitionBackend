@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
 using System.Windows.Input;
@@ -13,7 +14,7 @@ public class DeleteUserMenuPermissionValidator : AbstractValidator<DeleteUserMen
         RuleFor(x => x.Id).GreaterThan(0).WithMessage("User Menu Permission ID must be greater than 0.");
     }
 }
-public class DeleteUserMenuPermissionHandler(IUserMenuPermissionRepo userMenuPermissionRepo) : ICommandHandler<DeleteUserMenuPermissionCommand, DeleteUserMenuPermissionResponse>
+public class DeleteUserMenuPermissionHandler(IUserMenuPermissionRepo userMenuPermissionRepo ,AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<DeleteUserMenuPermissionCommand, DeleteUserMenuPermissionResponse>
 {
     public async Task<DeleteUserMenuPermissionResponse> Handle(DeleteUserMenuPermissionCommand request, CancellationToken cancellationToken)
     {
@@ -24,7 +25,7 @@ public class DeleteUserMenuPermissionHandler(IUserMenuPermissionRepo userMenuPer
         }
         
         var id = request.Id;
-        await userMenuPermissionRepo.DeleteAsync(id, 1, cancellationToken);
+        await userMenuPermissionRepo.DeleteAsync(id, authenticatedUserInfo.Id, cancellationToken);
         
         return new DeleteUserMenuPermissionResponse(true, $"User Menu Permission with ID {request.Id} deleted successfully.");
     }

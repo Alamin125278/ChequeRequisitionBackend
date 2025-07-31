@@ -6,6 +6,7 @@ public class SummaryReportDto
     public required string DeliveryBranch { get; set; }
     public required string ChallanNo { get; set; }
     public required DateOnly ChallanDate { get; set; }
+    public required bool IsAgent { get; set; }
     public int? Sb10 { get; set; }
     public  int? Sb20 { get; set; }
     public  int? Sb50 { get; set; }

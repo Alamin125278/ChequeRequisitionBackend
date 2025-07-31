@@ -57,6 +57,21 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.UserMenuPermission
             var result = await _cRDBContext.SaveChangesAsync(cancellationToken);
             return result > 0;
         }
+
+        public async Task<bool> DeleteMenusByUserIdAsync(int userId, int DeleteById, CancellationToken cancellationToken = default)
+        {
+            var affectedRows = await _cRDBContext.UserMenuPermissions
+        .Where(x => x.UserId == userId && x.IsActive == true && x.IsDeleted != true)
+        .ExecuteUpdateAsync(setters => setters
+            .SetProperty(x => x.IsDeleted, true)
+            .SetProperty(x => x.UpdatedBy, DeleteById)
+            .SetProperty(x => x.UpdatedAt, DateTime.UtcNow), // optional
+            cancellationToken);
+
+            return affectedRows > 0;
+
+        }
+
         public async Task<IEnumerable<UserMenuPermissionDto>> GetAllAsync(int Skip = 0, int Limit = 10, string? Search = null, CancellationToken cancellationToken = default)
         {
             var data = await _cRDBContext.UserMenuPermissions.AsNoTracking()
