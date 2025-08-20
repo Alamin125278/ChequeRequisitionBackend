@@ -42,6 +42,4 @@ public partial class Branch
     public virtual User? CreatedByNavigation { get; set; }
 
     public virtual User? UpdatedByNavigation { get; set; }
-
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

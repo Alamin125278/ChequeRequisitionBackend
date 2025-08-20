@@ -39,13 +39,9 @@ public partial class User
 
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
-    public virtual Bank? Bank { get; set; }
-
     public virtual ICollection<Bank> BankCreatedByNavigations { get; set; } = new List<Bank>();
 
     public virtual ICollection<Bank> BankUpdatedByNavigations { get; set; } = new List<Bank>();
-
-    public virtual Branch? Branch { get; set; }
 
     public virtual ICollection<Branch> BranchCreatedByNavigations { get; set; } = new List<Branch>();
 

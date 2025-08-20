@@ -75,8 +75,6 @@ public partial class ChequeBookRequisition
 
     public virtual User? CreatedByNavigation { get; set; }
 
-    public virtual ICollection<FtpRequisitionTracking> FtpRequisitionTrackings { get; set; } = new List<FtpRequisitionTracking>();
-
     public virtual Branch ReceivingBranch { get; set; } = null!;
 
     public virtual User? RequestedByNavigation { get; set; }

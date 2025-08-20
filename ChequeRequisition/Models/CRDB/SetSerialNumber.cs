@@ -31,8 +31,6 @@ public partial class SetSerialNumber
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual Bank Bank { get; set; } = null!;
-
     public virtual User? CreatedByNavigation { get; set; }
 
     public virtual User? UpdatedByNavigation { get; set; }

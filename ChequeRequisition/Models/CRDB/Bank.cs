@@ -39,13 +39,7 @@ public partial class Bank
 
     public virtual User? CreatedByNavigation { get; set; }
 
-    public virtual ICollection<FtpImport> FtpImports { get; set; } = new List<FtpImport>();
-
-    public virtual ICollection<SetSerialNumber> SetSerialNumbers { get; set; } = new List<SetSerialNumber>();
-
     public virtual User? UpdatedByNavigation { get; set; }
-
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 
     public virtual Vendor? Vendor { get; set; }
 }

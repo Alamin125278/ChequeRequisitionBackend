@@ -1,4 +1,5 @@
-﻿using ChequeRequisiontService.Core.Dto.Requisition;
+﻿using ChequeRequisiontService.Core.Dto.BulkUploadResult;
+using ChequeRequisiontService.Core.Dto.Requisition;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
@@ -11,7 +12,7 @@ public class LocalFileUploadRepo(CRDBContext cRDBContext) : ILocalFileUploadRepo
 {
     private readonly CRDBContext _cRDBContext = cRDBContext;
 
-    public async Task<bool> BulkUploadAsync(List<RequisitionDto> Items, int UserId, int? VendorId, CancellationToken cancellationToken = default)
+    public async Task<BulkUploadResultDto> BulkUploadAsync(List<RequisitionDto> Items, int UserId, int? VendorId, CancellationToken cancellationToken = default)
     {
         using var transaction = await _cRDBContext.Database.BeginTransactionAsync(cancellationToken);
 
@@ -35,13 +36,20 @@ public class LocalFileUploadRepo(CRDBContext cRDBContext) : ILocalFileUploadRepo
 
             await transaction.CommitAsync(cancellationToken); // ✅ commit only if everything is successful
 
-            return true;
+            return new BulkUploadResultDto
+            {
+                Success = true,
+                ErrorMessage = null
+            };
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync(cancellationToken); // ❌ rollback if any error
-                                                                // Optional: log the exception
-            return false;
+            await transaction.RollbackAsync(cancellationToken); // ❌ rollback if any error                                   // Optional: log the exception
+            return new BulkUploadResultDto
+            {
+                Success = false,
+                ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message, // You might want to log this or handle it differently
+            };
         }
     }
 

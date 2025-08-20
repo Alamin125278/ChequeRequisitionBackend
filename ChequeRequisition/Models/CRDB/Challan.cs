@@ -20,4 +20,6 @@ public partial class Challan
     public int? UpdatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public virtual ICollection<ChallanDetail> ChallanDetails { get; set; } = new List<ChallanDetail>();
 }

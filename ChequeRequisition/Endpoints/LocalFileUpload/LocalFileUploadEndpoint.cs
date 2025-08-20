@@ -14,9 +14,9 @@ public class LocalFileUploadEndpoint : ICarterModule
 
             var response = new ResponseDto<LocalFileUploadResult>
             {
-                Message = result.IsSuccess ? "Successfully uploaded cheque items." : "Failed to upload cheque items.",
+                Message = result.Message, // Use the actual message from result
                 Data = result,
-                StatusCode = StatusCodes.Status200OK 
+                StatusCode = StatusCodes.Status200OK
             };
 
             return Results.Json(response, statusCode: response.StatusCode);

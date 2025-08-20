@@ -82,10 +82,12 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
     {
         var query = _cRDBContext.Users
             .AsNoTracking()
-            .Include(x => x.Bank)
+            .Include(x => x.BankCreatedByNavigations)
+            .Include(x => x.BankUpdatedByNavigations)
             .Include(x => x.RoleNavigation)
             .Include(x => x.Vendor)
-            .Include(x => x.Branch)
+            .Include(x => x.BranchUpdatedByNavigations)
+            .Include(x => x.BranchCreatedByNavigations)
             .Where(x => x.UserName.Contains(Search) || x.Email.Contains(Search) || x.Name.Contains(Search) || Search == null)
                .Where(x => x.IsDelete== false)
                .Where(x => x.IsActive == IsActive || IsActive == null)
@@ -122,10 +124,12 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
     public async Task<UserDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var data = await _cRDBContext.Users
-       .Include(x => x.Bank)
+       .Include(x => x.BankCreatedByNavigations)
+.Include(x => x.BankUpdatedByNavigations)
        .Include(x => x.RoleNavigation)
        .Include(x => x.Vendor)
-       .Include(x => x.Branch)
+       .Include(x => x.BankCreatedByNavigations)
+.Include(x => x.BankUpdatedByNavigations)
        .FirstOrDefaultAsync(x => x.Id == id);
 
 

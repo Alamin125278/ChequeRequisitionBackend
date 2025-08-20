@@ -22,6 +22,8 @@ public partial class CRDBContext : DbContext
 
     public virtual DbSet<Branch> Branches { get; set; }
 
+    public virtual DbSet<BranchesTemp> BranchesTemps { get; set; }
+
     public virtual DbSet<Challan> Challans { get; set; }
 
     public virtual DbSet<ChallanDetail> ChallanDetails { get; set; }
@@ -39,6 +41,8 @@ public partial class CRDBContext : DbContext
     public virtual DbSet<Menu> Menus { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
+
+    public virtual DbSet<PubaliBranch> PubaliBranches { get; set; }
 
     public virtual DbSet<SetSerialNumber> SetSerialNumbers { get; set; }
 
@@ -157,6 +161,20 @@ public partial class CRDBContext : DbContext
                 .HasConstraintName("FK_Branches_Users1");
         });
 
+        modelBuilder.Entity<BranchesTemp>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("branches_temp");
+
+            entity.Property(e => e.BranchAddress).HasMaxLength(200);
+            entity.Property(e => e.BranchCode).HasMaxLength(50);
+            entity.Property(e => e.BranchEmail).HasMaxLength(100);
+            entity.Property(e => e.BranchName).HasMaxLength(200);
+            entity.Property(e => e.BranchPhone).HasMaxLength(50);
+            entity.Property(e => e.Id).HasMaxLength(1);
+        });
+
         modelBuilder.Entity<Challan>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Challans__3214EC079EDF1E5A");
@@ -174,9 +192,13 @@ public partial class CRDBContext : DbContext
 
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
 
+            entity.HasOne(d => d.Challan).WithMany(p => p.ChallanDetails)
+                .HasForeignKey(d => d.ChallanId)
+                .HasConstraintName("FK_ChallanDetails_Challans");
+
             entity.HasOne(d => d.RequisitionItem).WithMany(p => p.ChallanDetails)
                 .HasForeignKey(d => d.RequisitionItemId)
-                .HasConstraintName("FK__ChallanDe__Requi__628FA481");
+                .HasConstraintName("FK_ChallanDetails_ChequeBookRequisitions");
         });
 
         modelBuilder.Entity<ChequeBookRequisition>(entity =>
@@ -184,7 +206,7 @@ public partial class CRDBContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__ChequeBo__3214EC07B77056B1");
 
             entity.Property(e => e.AccountName)
-                .HasMaxLength(60)
+                .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.AccountNo)
                 .HasMaxLength(30)
@@ -229,29 +251,29 @@ public partial class CRDBContext : DbContext
             entity.HasOne(d => d.Branch).WithMany(p => p.ChequeBookRequisitionBranches)
                 .HasForeignKey(d => d.BranchId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ChequeBookRequisitions_Branches");
+                .HasConstraintName("FK_ChequeBookRequisitions_Branches1");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ChequeBookRequisitionCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__ChequeBoo__Creat__5629CD9C");
+                .HasConstraintName("FK_ChequeBookRequisitions_Users");
 
             entity.HasOne(d => d.ReceivingBranch).WithMany(p => p.ChequeBookRequisitionReceivingBranches)
                 .HasForeignKey(d => d.ReceivingBranchId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ChequeBookRequisitions_Branches1");
+                .HasConstraintName("FK_ChequeBookRequisitions_Branches");
 
             entity.HasOne(d => d.RequestedByNavigation).WithMany(p => p.ChequeBookRequisitionRequestedByNavigations)
                 .HasForeignKey(d => d.RequestedBy)
-                .HasConstraintName("FK__ChequeBoo__Reque__534D60F1");
+                .HasConstraintName("FK_ChequeBookRequisitions_Users1");
 
             entity.HasOne(d => d.StatusNavigation).WithMany(p => p.ChequeBookRequisitions)
                 .HasForeignKey(d => d.Status)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ChequeBoo__Statu__5535A963");
+                .HasConstraintName("FK_ChequeBookRequisitions_Statuses");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.ChequeBookRequisitionUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__ChequeBoo__Updat__571DF1D5");
+                .HasConstraintName("FK_ChequeBookRequisitions_Users2");
         });
 
         modelBuilder.Entity<Courier>(entity =>
@@ -295,10 +317,6 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
-
-            entity.HasOne(d => d.Bank).WithMany(p => p.FtpImports)
-                .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK_ftp_imports_Banks");
         });
 
         modelBuilder.Entity<FtpRequisitionTracking>(entity =>
@@ -313,11 +331,6 @@ public partial class CRDBContext : DbContext
                 .HasForeignKey(d => d.ImportLogId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__FtpRequis__Impor__4C0144E4");
-
-            entity.HasOne(d => d.Requisition).WithMany(p => p.FtpRequisitionTrackings)
-                .HasForeignKey(d => d.RequisitionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__FtpRequis__Requi__4B0D20AB");
         });
 
         modelBuilder.Entity<Menu>(entity =>
@@ -366,6 +379,22 @@ public partial class CRDBContext : DbContext
                 .HasConstraintName("FK__Notificat__UserI__7C4F7684");
         });
 
+        modelBuilder.Entity<PubaliBranch>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("pubaliBranches");
+
+            entity.Property(e => e.BranchAddress).HasMaxLength(200);
+            entity.Property(e => e.BranchCode).HasMaxLength(50);
+            entity.Property(e => e.BranchEmail)
+                .HasMaxLength(100)
+                .HasColumnName("branchEmail");
+            entity.Property(e => e.BranchName).HasMaxLength(50);
+            entity.Property(e => e.BranchPhone).HasMaxLength(50);
+            entity.Property(e => e.Id).HasMaxLength(1);
+        });
+
         modelBuilder.Entity<SetSerialNumber>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__SetSeria__3214EC07B37BF37A");
@@ -387,11 +416,6 @@ public partial class CRDBContext : DbContext
                 .HasMaxLength(30)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Bank).WithMany(p => p.SetSerialNumbers)
-                .HasForeignKey(d => d.BankId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SetSerialNumbers_Banks");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.SetSerialNumberCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
@@ -455,14 +479,6 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.UserName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-
-            entity.HasOne(d => d.Bank).WithMany(p => p.Users)
-                .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK_Users_Banks");
-
-            entity.HasOne(d => d.Branch).WithMany(p => p.Users)
-                .HasForeignKey(d => d.BranchId)
-                .HasConstraintName("FK_Users_Branches");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.InverseCreatedByNavigation)
                 .HasForeignKey(d => d.CreatedBy)

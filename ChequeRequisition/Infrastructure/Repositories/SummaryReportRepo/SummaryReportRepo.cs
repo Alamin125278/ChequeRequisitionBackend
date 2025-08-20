@@ -40,6 +40,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
                             Sb10 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 10 ? x.requisition.BookQty : 0),
                             Sb20 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 20 ? x.requisition.BookQty : 0),
+                            Sb25 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 25 ? x.requisition.BookQty : 0),
                             Sb50 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 50 ? x.requisition.BookQty : 0),
 
                             Cd10 = g.Sum(x => x.requisition.ChequeType == "Current" && x.requisition.Leaves == 10 ? x.requisition.BookQty : 0),

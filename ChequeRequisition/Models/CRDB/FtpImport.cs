@@ -17,7 +17,5 @@ public partial class FtpImport
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual Bank? Bank { get; set; }
-
     public virtual ICollection<FtpRequisitionTracking> FtpRequisitionTrackings { get; set; } = new List<FtpRequisitionTracking>();
 }

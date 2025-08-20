@@ -14,6 +14,4 @@ public partial class FtpRequisitionTracking
     public DateTime? CreatedAt { get; set; }
 
     public virtual FtpImport ImportLog { get; set; } = null!;
-
-    public virtual ChequeBookRequisition Requisition { get; set; } = null!;
 }

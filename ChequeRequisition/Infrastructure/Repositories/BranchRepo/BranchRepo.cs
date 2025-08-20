@@ -112,14 +112,51 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data?.Adapt<BranchDto>();
         }
 
-        public async Task<int> GetIdAsync(int BankId, string RoutingNo, CancellationToken cancellationToken = default)
+        public async Task<int> GetIdAsync(int bankId, string branchName, string? branchCode = null,CancellationToken cancellationToken = default)
         {
-            var branchId = await _cRDBContext.Branches.AsNoTracking()
-                .Where(x => x.BankId == BankId && x.BranchCode == RoutingNo && x.IsDeleted == false)
+            var query = _cRDBContext.Branches
+                .AsNoTracking()
+                .Where(x => x.BankId == bankId && !x.IsDeleted && x.IsActive==true);
+
+            // Handle special characters in branchName
+            var specialChars = new[] { '-', ',' };
+            var trimmedBranchName = branchName;
+            int index = branchName.IndexOfAny(specialChars);
+            if (index > 0)
+            {
+                trimmedBranchName = branchName.Substring(0, index);
+            }
+
+            // Apply filtering
+            if (!string.IsNullOrEmpty(branchCode))
+            {
+                // Special case: branchCode is "PO" → Only filter by BranchName
+                if (branchCode == "PO")
+                {
+                    query = query.Where(x =>
+                        x.BranchName!.Contains(trimmedBranchName));
+                }
+                else
+                {
+                    // General case: Match both branchCode and branchName (partial match)
+                    query = query.Where(x =>
+                        x.BranchCode == branchCode &&
+                        x.BranchName!.Contains(trimmedBranchName));
+                }
+            }
+            else
+            {
+                // ✅ When branchCode is not present, match only branchName (partial)
+                query = query.Where(x =>
+                    x.BranchName != null &&
+                    x.BranchName==branchName);
+            }
+
+            return await query
                 .Select(x => x.Id)
                 .FirstOrDefaultAsync(cancellationToken);
-            return branchId;
         }
+
 
         public async Task<BranchDto> UpdateAsync(BranchDto entity, int Id, int UserId, CancellationToken cancellationToken = default)
         {

@@ -88,12 +88,20 @@ public class BulkLocalFileUploadHandler(
 
         foreach (var item in request.Items)
         {
-         
-
-            int branchId = await branchRepo.GetIdAsync(item.BankId, item.HomeBranchCode, cancellationToken);
+            int branchId;
+            if (item.ChequeType == "Payment Order")
+            {
+                 branchId = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO", cancellationToken);
+                if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
+            }
+            else
+            {
+                branchId = await branchRepo.GetIdAsync(item.BankId, item.BranchName, item.HomeBranchCode, cancellationToken);
             if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
 
-            int receivingBranchId = await branchRepo.GetIdAsync(item.BankId, item.DeliveryBranchCode, cancellationToken);
+            }
+
+            int receivingBranchId = await branchRepo.GetIdAsync(item.BankId, item.ReceivingBranchName, null,cancellationToken);
             if (receivingBranchId == 0) return new LocalFileUploadResult(false, $"Receiving branch '{item.ReceivingBranchName}' not found.");
 
             var dto = item.Adapt<RequisitionDto>();
@@ -111,10 +119,11 @@ public class BulkLocalFileUploadHandler(
             requisitionDtos.Add(dto);
         }
 
-        bool result = await localFileUploadRepo.BulkUploadAsync(requisitionDtos, authenticatedUserInfo.Id,authenticatedUserInfo.VendorId, cancellationToken);
-        return result
+        var result = await localFileUploadRepo.BulkUploadAsync(requisitionDtos, authenticatedUserInfo.Id,authenticatedUserInfo.VendorId, cancellationToken);
+
+        return result.Success
             ? new LocalFileUploadResult(true, "Bulk upload successful.")
-            : new LocalFileUploadResult(false, "Bulk upload failed.");
+            : new LocalFileUploadResult(false, $"Bulk upload failed: {result.ErrorMessage}");
     }
 }
 
