@@ -41,14 +41,16 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             Sb10 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 10 ? x.requisition.BookQty : 0),
                             Sb20 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 20 ? x.requisition.BookQty : 0),
                             Sb25 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 25 ? x.requisition.BookQty : 0),
-                            Sb50 = g.Sum(x => x.requisition.ChequeType == "Savings" && x.requisition.Leaves == 50 ? x.requisition.BookQty : 0),
 
                             Cd10 = g.Sum(x => x.requisition.ChequeType == "Current" && x.requisition.Leaves == 10 ? x.requisition.BookQty : 0),
                             Cd25 = g.Sum(x => x.requisition.ChequeType == "Current" && x.requisition.Leaves == 25 ? x.requisition.BookQty : 0),
                             Cd50 = g.Sum(x => x.requisition.ChequeType == "Current" && x.requisition.Leaves == 50 ? x.requisition.BookQty : 0),
                             Cd100 = g.Sum(x => x.requisition.ChequeType == "Current" && x.requisition.Leaves == 100 ? x.requisition.BookQty : 0),
 
+                            Po50 = g.Sum(x => x.requisition.ChequeType == "Payment Order" && x.requisition.Leaves == 50 ? x.requisition.BookQty : 0),
                             Po100 = g.Sum(x => x.requisition.ChequeType == "Payment Order" && x.requisition.Leaves == 100 ? x.requisition.BookQty : 0),
+                            Ca50 = g.Sum(x => x.requisition.ChequeType == "Cash Credit" && x.requisition.Leaves == 50 ? x.requisition.BookQty : 0),
+                            Ca100 = g.Sum(x => x.requisition.ChequeType == "Cash Credit" && x.requisition.Leaves == 100 ? x.requisition.BookQty : 0),
                             Total = g.Sum(x => x.requisition.BookQty)
                         };
             var data = await query.ToListAsync(cancellationToken);
