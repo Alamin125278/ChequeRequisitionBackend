@@ -18,37 +18,22 @@ public class GetChallanHandler(IChallanRepo challanRepo,IRequisitonRepo requisit
             // Step 1: Get challan export data
             var data = await challanRepo.GetChallanExportDataAsync(request.ChallanIds, cancellationToken);
 
-            // Step 2: Extract all item IDs from the challan
-            var itemIds = data.SelectMany(d => d.Items)
-                              .Select(item => item.ItemId)
-                              .ToList();
-
-            // Step 3: If there are no item IDs, return empty response
-            if (itemIds.Count == 0)
+            // Step 2: If no data, return empty list
+            if (data == null || data.Count == 0)
             {
-                return new GetChallanResponse([]);
+                return new GetChallanResponse(new List<ChallanExportDto>());
             }
 
-            // Step 4: Update all requisitions at once
-            var updatedCount = await requisitonRepo.UpdateChequeListAsync(itemIds,4, authenticatedUserInfo.Id, cancellationToken);
-
-            // Step 5: If update count matches item count, commit and return data
-            if (updatedCount == itemIds.Count)
-            {
-                await transaction.CommitAsync(cancellationToken);
-                return new GetChallanResponse(data);
-            }
-
-            // Step 6: Mismatch in count? Rollback and return empty
-            await transaction.RollbackAsync(cancellationToken);
-            return new GetChallanResponse([]);
+            // Step 3: Commit transaction and return data
+            await transaction.CommitAsync(cancellationToken);
+            return new GetChallanResponse(data);
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellationToken);
-            // Optional: log the error
-            throw new Exception("Failed to get and update challan data", ex);
+            throw new Exception("Failed to get challan data", ex);
         }
     }
+
 }
 

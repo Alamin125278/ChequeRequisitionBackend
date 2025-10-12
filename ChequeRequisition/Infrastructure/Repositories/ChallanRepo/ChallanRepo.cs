@@ -8,12 +8,23 @@ using DocumentFormat.OpenXml.Math;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Linq;
 
 namespace ChequeRequisiontService.Infrastructure.Repositories.ChallanRepo;
 
 public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
 {
     private CRDBContext _cRDBContext = cRDBContext;
+    private static int ExtractSerialFromChallanNumber(string challanNumber)
+    {
+        var parts = challanNumber?.Split('-');
+        if (parts != null && parts.Length == 3 && int.TryParse(parts[2], out int serial))
+        {
+            return serial;
+        }
+        return 0;
+    }
+
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         return _cRDBContext.Database.BeginTransactionAsync(cancellationToken);
@@ -124,56 +135,86 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
     }
 
     public async Task<IEnumerable<ChallanDto>> GetAllAsync(
-        int? BankId,
-        int? BranchId,
-        int? VendorId,
-        DateOnly? RequestDate,
-        int Skip = 0,
-        int Limit = 10,
-        string? Search = null,
-        CancellationToken cancellationToken = default)
+     int? BankId,
+     int? BranchId,
+     int? VendorId,
+     DateOnly? RequestDate,
+     int Skip = 0,
+     int Limit = 10,
+     string? Search = null,
+     CancellationToken cancellationToken = default)
     {
+        // Step 1: Filtered Challan IDs with pagination
+        var filteredChallanIds = await (
+            from challan in _cRDBContext.Challans
+            join detail in _cRDBContext.ChallanDetails on challan.Id equals detail.ChallanId
+            join requisition in _cRDBContext.ChequeBookRequisitions on detail.RequisitionItemId equals requisition.Id
+            where
+                (BankId == null || requisition.BankId == BankId) &&
+                (BranchId == null || challan.ReceivingBranch == BranchId) &&
+                (VendorId == null || requisition.VendorId == VendorId) &&
+                (RequestDate == null || challan.ChallanDate == RequestDate) &&
+                (string.IsNullOrEmpty(Search) || challan.ChallanNumber.Contains(Search))
+            select challan.Id
+        )
+        .Distinct()
+        .OrderByDescending(id => id)
+        .Skip(Skip)
+        .Take(Limit)
+        .ToListAsync(cancellationToken);
 
+        if (!filteredChallanIds.Any())
+            return Enumerable.Empty<ChallanDto>();
+
+        // Step 2: Preload Requisition Counts (once only)
         var requisitionCounts = await _cRDBContext.ChallanDetails
-    .GroupBy(cd => cd.ChallanId)
-    .Select(g => new { ChallanId = g.Key, Count = g.Count() })
-    .ToDictionaryAsync(x => x.ChallanId, x => x.Count, cancellationToken);
+            .Where(cd => filteredChallanIds.Contains(cd.ChallanId.Value))
+            .GroupBy(cd => cd.ChallanId)
+            .Select(g => new { ChallanId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ChallanId, x => x.Count, cancellationToken);
 
+        // Step 3: Load all required data
         var query = from challan in _cRDBContext.Challans.AsNoTracking()
-                    join tracking in _cRDBContext.ChallanDetails on challan.Id equals tracking.ChallanId
-                    join requisition in _cRDBContext.ChequeBookRequisitions on tracking.RequisitionItemId equals requisition.Id
-                    join reBranch in _cRDBContext.Branches on challan.ReceivingBranch equals reBranch.Id
+                    join detail in _cRDBContext.ChallanDetails on challan.Id equals detail.ChallanId
+                    join requisition in _cRDBContext.ChequeBookRequisitions on detail.RequisitionItemId equals requisition.Id
+                    join branch in _cRDBContext.Branches on challan.ReceivingBranch equals branch.Id
                     join bank in _cRDBContext.Banks on requisition.BankId equals bank.Id
                     join vendor in _cRDBContext.Vendors on requisition.VendorId equals vendor.Id
                     join courier in _cRDBContext.Couriers on requisition.CourierCode equals courier.CourierCode
-                    where
-                        (BankId == null || requisition.BankId == BankId) &&
-                        (BranchId == null || challan.ReceivingBranch == BranchId) &&
-                        (VendorId == null || requisition.VendorId == VendorId) &&
-                        (RequestDate == null || challan.ChallanDate == RequestDate) &&
-                        (string.IsNullOrEmpty(Search) || challan.ChallanNumber.Contains(Search))
-                    group new { challan, requisition, bank, vendor, courier, reBranch } by challan.Id into g
-                    select new ChallanDto
+                    where filteredChallanIds.Contains(challan.Id)
+                    select new
                     {
-                        Id = g.Key,
-                        ChallanNumber = g.Select(x => x.challan.ChallanNumber).FirstOrDefault(),
-                        ChallanDate = g.Select(x => x.challan.ChallanDate).FirstOrDefault(),
-                        ReceivingBranch = g.Select(x => x.challan.ReceivingBranch).FirstOrDefault(),
-                        BankName = g.Select(x => x.bank.BankName).FirstOrDefault(),
-                        VendorName = g.Select(x => x.vendor.VendorName).FirstOrDefault(),
-                        CourierName = g.Select(x => x.courier.CourierName).FirstOrDefault(),
-                        ReceivingBranchName = g.Select(x => x.reBranch.BranchName).FirstOrDefault(),
-                        RequisitionCount = _cRDBContext.ChallanDetails.Count(cd => cd.ChallanId == g.Key)
+                        challan.Id,
+                        challan.ChallanNumber,
+                        challan.ChallanDate,
+                        challan.ReceivingBranch,
+                        branch.BranchName,
+                        bank.BankName,
+                        vendor.VendorName,
+                        courier.CourierName
                     };
 
-        var data = await query
-            .OrderByDescending(x => x.ChallanDate)
-            .Skip(Skip)
-            .Take(Limit)
+        // Step 4: Final projection with distinct ChallanIds (remove duplicates from join)
+        var challanData = await query
+            .Distinct()
             .ToListAsync(cancellationToken);
 
-        return data;
+        var result = challanData.Select(x => new ChallanDto
+        {
+            Id = x.Id,
+            ChallanNumber = x.ChallanNumber,
+            ChallanDate = x.ChallanDate,
+            ReceivingBranch = x.ReceivingBranch,
+            ReceivingBranchName = x.BranchName,
+            BankName = x.BankName,
+            VendorName = x.VendorName,
+            CourierName = x.CourierName,
+            RequisitionCount = requisitionCounts.ContainsKey(x.Id) ? requisitionCounts[x.Id] : 0
+        }).OrderByDescending(x => x.Id); 
+
+        return result;
     }
+
 
     public async Task<int> GetAllCountAsync(int? BankId, int? BranchId, int? VendorId, DateOnly? RequestDate, string? Search = null, CancellationToken cancellationToken = default)
     {
@@ -229,5 +270,21 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                          )
                          .CountAsync(cancellationToken);
         return count;
+    }
+
+    public async Task<int> GetChallanNumber(int BankId, CancellationToken cancellationToken = default)
+    {
+        var lastChallanNumber = await(from r in _cRDBContext.ChequeBookRequisitions
+                                      join cd in _cRDBContext.ChallanDetails on r.Id equals cd.RequisitionItemId
+                                      join c in _cRDBContext.Challans on cd.ChallanId equals c.Id
+                                      where r.BankId == BankId
+                                      orderby c.Id descending
+                                      select c.ChallanNumber)
+                                 .FirstOrDefaultAsync(cancellationToken);
+
+        if (string.IsNullOrEmpty(lastChallanNumber))
+            return 0;
+
+        return ExtractSerialFromChallanNumber(lastChallanNumber);
     }
 }

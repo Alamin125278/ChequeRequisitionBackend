@@ -8,5 +8,9 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories
             int BankId,
             DateOnly fromDate, 
             DateOnly toDate,int Severity,bool AgentType,CancellationToken cancellationToken=default);
+        Task<IEnumerable<SummaryReportDto>> GetCourierSummaryReportAsync(
+            int BankId,
+            DateOnly fromDate, 
+            DateOnly toDate,int Severity,bool AgentType,CancellationToken cancellationToken=default);
     }
 }

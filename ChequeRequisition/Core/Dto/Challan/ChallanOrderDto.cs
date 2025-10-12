@@ -4,4 +4,5 @@ public class ChallanOrderDto
 {
     public int Id { get; set; }
     public int ReceivingBranchId { get; set; }
+    public int BankId { get; set; }
 }

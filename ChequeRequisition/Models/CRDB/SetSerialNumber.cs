@@ -17,6 +17,8 @@ public partial class SetSerialNumber
 
     public string EndingNo { get; set; } = null!;
 
+    public int? Lvs { get; set; }
+
     public string EndLimit { get; set; } = null!;
 
     public string Series { get; set; } = null!;

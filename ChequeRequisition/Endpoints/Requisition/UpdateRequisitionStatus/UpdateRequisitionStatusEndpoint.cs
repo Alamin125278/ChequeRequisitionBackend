@@ -7,7 +7,7 @@ namespace ChequeRequisiontService.Endpoints.Requisition.UpdateRequisitionStatus
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPut("/api/requisition/update-cheque-requisition", async (UpdateRequisitionStatusCommand command, ISender sender, CancellationToken cancellationToken) =>
+            app.MapPatch("/api/requisition/update-cheque-requisition", async (UpdateRequisitionStatusCommand command, ISender sender, CancellationToken cancellationToken) =>
             {
                 var result = await sender.Send(command, cancellationToken);
                 return result.IsUpdated ? Results.Ok(result) : Results.BadRequest("Failed to update requisition status");

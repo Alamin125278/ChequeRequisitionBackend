@@ -112,7 +112,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data?.Adapt<BranchDto>();
         }
 
-        public async Task<int> GetIdAsync(int bankId, string branchName, string? branchCode = null,CancellationToken cancellationToken = default)
+        public async Task<BranchDto?> GetIdAsync(int bankId, string branchName, string? branchCode = null,CancellationToken cancellationToken = default)
         {
             var query = _cRDBContext.Branches
                 .AsNoTracking()
@@ -152,9 +152,9 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
                     x.BranchName==branchName);
             }
 
-            return await query
-                .Select(x => x.Id)
+            var data= await query.AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
+            return data?.Adapt<BranchDto>();
         }
 
 

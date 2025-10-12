@@ -12,6 +12,7 @@ using ChequeRequisiontService.Infrastructure.Repositories.Dashboard;
 using ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision;
 using ChequeRequisiontService.Infrastructure.Repositories.FtpImportExcel;
 using ChequeRequisiontService.Infrastructure.Repositories.LocalFileUploadRepo;
+using ChequeRequisiontService.Infrastructure.Repositories.ManageSerialRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.MenuRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.SummaryReportRepo;
@@ -57,5 +58,6 @@ public static class DependencyContainer
         services.AddScoped<IChallanRepo, ChallanRepo>();
         services.AddScoped<ISummaryReport, SummaryReportRepo>();
         services.AddScoped<IDashboardRepo, DashboardRepo>();
+        services.AddScoped<IManageSerialRepo, ManageSerialRepo>();
     }
 }

@@ -13,4 +13,5 @@ public interface IChallanRepo
     Task<int> GetAllCountAsync(int? BankId, int? BranchId, int? VendorId, DateOnly? RequestDate,string? Search=null, CancellationToken cancellationToken = default);
     Task<IEnumerable<ChallanItemDto>>GetAllItemAsync(int Id, CancellationToken cancellationToken= default);
     Task<int>GetAllItemCountAsync(int Id, CancellationToken cancellationToken= default);
+    Task<int> GetChallanNumber(int BankId, CancellationToken cancellationToken = default);
 }

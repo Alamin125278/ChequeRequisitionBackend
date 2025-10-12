@@ -2,6 +2,7 @@
 using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.Requisition;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
+using ChequeRequisiontService.Models.CRDB;
 using FluentValidation;
 using Mapster;
 using System.Numerics;
@@ -89,19 +90,22 @@ public class BulkLocalFileUploadHandler(
         foreach (var item in request.Items)
         {
             int branchId;
-            if (item.ChequeType == "Payment Order")
+            if (item.ChequeType == "Payment Order" || item.ChequeType=="FDR" || item.ChequeType == "MTDR" || item.ChequeType == "POA" || item.ChequeType == "POI")
             {
-                 branchId = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO", cancellationToken);
+                 var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO", cancellationToken);
+                branchId = branch != null ? branch.Id : 0;
                 if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
             }
             else
             {
-                branchId = await branchRepo.GetIdAsync(item.BankId, item.BranchName, item.HomeBranchCode, cancellationToken);
-            if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
+                var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, item.HomeBranchCode, cancellationToken);
+                branchId = branch != null ? branch.Id : 0;
+                if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
 
             }
 
-            int receivingBranchId = await branchRepo.GetIdAsync(item.BankId, item.ReceivingBranchName, null,cancellationToken);
+            var receivingBranch = await branchRepo.GetIdAsync(item.BankId, item.ReceivingBranchName, null,cancellationToken);
+           int receivingBranchId = receivingBranch != null ? receivingBranch.Id : 0;
             if (receivingBranchId == 0) return new LocalFileUploadResult(false, $"Receiving branch '{item.ReceivingBranchName}' not found.");
 
             var dto = item.Adapt<RequisitionDto>();

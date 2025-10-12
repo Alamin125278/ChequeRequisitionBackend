@@ -33,9 +33,10 @@ public class ExcelParserService(IBranchRepo branchRepo,IBankRepo bankRepo) : IEx
                     var row = ws.Row(i);
                     var RoutingNo = row.Cell(2).GetString();
                     var receivingBranchName = row.Cell(19).GetString();
-                    int branchId = await _branchRepo.GetIdAsync(ftp.BankId, RoutingNo);
-                    int receivingBranchId = await _branchRepo.GetIdAsync(ftp.BankId, RoutingNo);
-
+                    var branch = await _branchRepo.GetIdAsync(ftp.BankId, RoutingNo);
+                    int branchId = branch !=null ? branch.Id : 0;
+                    var receivingBranch = await _branchRepo.GetIdAsync(ftp.BankId, RoutingNo);
+                    int receivingBranchId = receivingBranch != null ? receivingBranch.Id : 0;
                     string prefix = row.Cell(5).GetString().Trim().ToUpper();
                     string chequeType = "";
                     int Leaves = int.Parse(row.Cell(9).GetString());
