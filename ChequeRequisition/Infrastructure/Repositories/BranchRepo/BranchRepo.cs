@@ -112,19 +112,32 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data?.Adapt<BranchDto>();
         }
 
-        public async Task<BranchDto?> GetIdAsync(int bankId, string branchName, string? branchCode = null,CancellationToken cancellationToken = default)
+        public async Task<BranchDto?> GetIdAsync(int bankId, string branchName, string? branchCode = null,string? IsAgent = null, CancellationToken cancellationToken = default)
         {
             var query = _cRDBContext.Branches
                 .AsNoTracking()
                 .Where(x => x.BankId == bankId && !x.IsDeleted && x.IsActive==true);
 
             // Handle special characters in branchName
-            var specialChars = new[] { '-', ',' };
             var trimmedBranchName = branchName;
-            int index = branchName.IndexOfAny(specialChars);
-            if (index > 0)
+            var dashIndex = branchName.IndexOf('-');
+            if (dashIndex >= 0 && IsAgent=="Agent")
             {
-                trimmedBranchName = branchName.Substring(0, index);
+                var afterDash = branchName.Substring(dashIndex + 1).Trim();
+
+                var bracketIndex = afterDash.IndexOf('(');
+                if (bracketIndex > 0)
+                {
+                    trimmedBranchName = afterDash.Substring(0, bracketIndex).Trim();
+                }
+                else
+                {
+                    trimmedBranchName = afterDash;
+                }
+            }
+            else if (branchName.Contains(','))
+            {
+                trimmedBranchName = branchName.Substring(0, branchName.IndexOf(',')).Trim();
             }
 
             // Apply filtering
@@ -134,14 +147,21 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
                 if (branchCode == "PO")
                 {
                     query = query.Where(x =>
-                        x.BranchName!.Contains(trimmedBranchName));
+                        x.BranchName!.StartsWith(trimmedBranchName));
+                }
+                // Special case:branchCode is Agent Midlad Bank Agent Branches -> Match both branchCode and branchName (partial match)
+                else if (IsAgent == "Agent")
+                {
+                    query = query.Where(x =>
+                         x.BranchCode == branchCode &&
+                        x.BranchName!.StartsWith(trimmedBranchName));
                 }
                 else
                 {
                     // General case: Match both branchCode and branchName (partial match)
                     query = query.Where(x =>
                         x.BranchCode == branchCode &&
-                        x.BranchName!.Contains(trimmedBranchName));
+                        x.BranchName!.StartsWith(trimmedBranchName));
                 }
             }
             else
@@ -158,31 +178,35 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
         }
 
 
-        public async Task<BranchDto> UpdateAsync(BranchDto entity, int Id, int UserId, CancellationToken cancellationToken = default)
+        public async Task<BranchDto?> UpdateAsync(BranchDto updatedDto, int id, int userId, CancellationToken cancellationToken = default)
         {
+            var existingBranch = await _cRDBContext.Branches
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+
+            if (existingBranch is null)
+                return null;
+
+            // Map updated data to a new object with existing ID
+            var updatedBranch = updatedDto.Adapt<Branch>();
+            updatedBranch.Id = id;
+            updatedBranch.UpdatedAt = DateTime.UtcNow;
+            updatedBranch.UpdatedBy = userId;
+
+            // Attach and mark as modified
+            _cRDBContext.Branches.Attach(updatedBranch);
+            _cRDBContext.Entry(updatedBranch).State = EntityState.Modified;
+
             try
             {
-                var data = await _cRDBContext.Branches
-                .FirstOrDefaultAsync(x => x.Id == Id && x.IsDeleted == false, cancellationToken);
-                if (data == null)
-                    return null;
-                data = entity.Adapt(data);
-                data.UpdatedAt = DateTime.UtcNow;
-                data.UpdatedBy = UserId;
-
-                var result = await _cRDBContext.SaveChangesAsync(cancellationToken);
-                if (result > 0)
-                {
-                    return data.Adapt<BranchDto>();
-                }
-                throw new Exception("Failed to update branch");
+                var affectedRows = await _cRDBContext.SaveChangesAsync(cancellationToken);
+                return affectedRows > 0 ? updatedBranch.Adapt<BranchDto>() : null;
             }
-            catch(DbUpdateException ex)
+            catch (DbUpdateException ex)
             {
-                throw new Exception("Database update error: " + (ex.InnerException?.Message ?? ex.Message), ex);
+                throw new Exception($"Database update error: {ex.InnerException?.Message ?? ex.Message}", ex);
             }
-            
-            
         }
+
     }
 }

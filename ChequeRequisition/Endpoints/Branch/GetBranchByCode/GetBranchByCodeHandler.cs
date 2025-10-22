@@ -9,7 +9,7 @@ public class GetBranchByCodeHandler(IBranchRepo branchRepo) : IQueryHandler<GetB
 {
     public async Task<GetBranchByCodeRes> Handle(GetBranchByCodeQuery request, CancellationToken cancellationToken)
     {
-        var branch = await branchRepo.GetIdAsync(request.BankId,request.BranchName,request.BranchCode, cancellationToken);
+        var branch = await branchRepo.GetIdAsync(request.BankId,request.BranchName,request.BranchCode,null, cancellationToken);
         if(branch== null) return new GetBranchByCodeRes(false, null);
         return new GetBranchByCodeRes(true, branch);
     }

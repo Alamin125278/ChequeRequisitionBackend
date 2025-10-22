@@ -20,7 +20,9 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.Dashboard
                             (VendorId == null || x.VendorId == VendorId) &&
                             x.RequestDate >= StartDate &&
                             x.RequestDate <= EndDate)
-                .CountAsync(cancellationToken);
+                            .SumAsync(x => x.BookQty, cancellationToken);
+
+
             return count;
         }
 
@@ -66,7 +68,8 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.Dashboard
                         select new OrderTrackingDto
                         {
                             Label = g.Key.StatusName,
-                            Count = g.Count(x => x != null)
+                            Count = g.Sum(x => x.BookQty)
+
                         };
 
             return await query.ToListAsync(cancellationToken);

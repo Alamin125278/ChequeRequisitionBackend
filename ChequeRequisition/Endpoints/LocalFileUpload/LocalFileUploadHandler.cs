@@ -92,19 +92,27 @@ public class BulkLocalFileUploadHandler(
             int branchId;
             if (item.ChequeType == "Payment Order" || item.ChequeType=="FDR" || item.ChequeType == "MTDR" || item.ChequeType == "POA" || item.ChequeType == "POI")
             {
-                 var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO", cancellationToken);
+                 var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO",null, cancellationToken);
                 branchId = branch != null ? branch.Id : 0;
                 if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
+            }
+            else if (item.IsAgent) // ✅ Agent check re-enabled
+            {
+                var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, item.HomeBranchCode, "Agent", cancellationToken);
+                branchId = branch != null ? branch.Id : 0;
+
+                if (branchId == 0)
+                    return new LocalFileUploadResult(false, $"Agent Branch '{item.BranchName}' not found.");
             }
             else
             {
-                var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, item.HomeBranchCode, cancellationToken);
+                var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, item.HomeBranchCode,null, cancellationToken);
                 branchId = branch != null ? branch.Id : 0;
                 if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
 
             }
 
-            var receivingBranch = await branchRepo.GetIdAsync(item.BankId, item.ReceivingBranchName, null,cancellationToken);
+            var receivingBranch = await branchRepo.GetIdAsync(item.BankId, item.ReceivingBranchName, null,null,cancellationToken);
            int receivingBranchId = receivingBranch != null ? receivingBranch.Id : 0;
             if (receivingBranchId == 0) return new LocalFileUploadResult(false, $"Receiving branch '{item.ReceivingBranchName}' not found.");
 
