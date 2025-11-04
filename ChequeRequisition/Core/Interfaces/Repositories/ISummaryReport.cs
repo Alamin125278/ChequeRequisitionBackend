@@ -12,5 +12,11 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories
             int BankId,
             DateOnly fromDate, 
             DateOnly toDate,int Severity,bool AgentType,CancellationToken cancellationToken=default);
+
+        Task<IEnumerable<DailyProductionReportDto>> GetDailyProductionReportAsync(DateTime date,CancellationToken cancellationToken=default);
+        Task<IEnumerable<ConsumptionReportDto>> GetConsumptionReportAsync(
+            int BankId,
+            DateOnly fromDate, 
+            DateOnly toDate,CancellationToken cancellationToken=default);
     }
 }
