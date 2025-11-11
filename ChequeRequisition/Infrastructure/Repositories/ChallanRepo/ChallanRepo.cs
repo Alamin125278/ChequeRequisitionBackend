@@ -95,6 +95,7 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                         requisition.CusAddress,
                         requisition.AgentNum,
                         requisition.IsAgent,
+                        requisition.RequestDate,
                         Item = new ChallanItemDto
                         {
                             ItemId = requisition.Id,
@@ -126,6 +127,7 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
         AgentNum = g.First().AgentNum,
         CusAddress = g.First().CusAddress,
         IsAgent = g.First().IsAgent??false,
+        ReDate=g.First().RequestDate.ToString(),
         Items = g.Select(x => x.Item).ToList()
     })
     .ToList();

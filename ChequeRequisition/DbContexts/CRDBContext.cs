@@ -38,6 +38,8 @@ public partial class CRDBContext : DbContext
 
     public virtual DbSet<FtpRequisitionTracking> FtpRequisitionTrackings { get; set; }
 
+    public virtual DbSet<LocalFileImport> LocalFileImports { get; set; }
+
     public virtual DbSet<Menu> Menus { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -192,10 +194,6 @@ public partial class CRDBContext : DbContext
 
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Challan).WithMany(p => p.ChallanDetails)
-                .HasForeignKey(d => d.ChallanId)
-                .HasConstraintName("FK_ChallanDetails_Challans");
-
             entity.HasOne(d => d.RequisitionItem).WithMany(p => p.ChallanDetails)
                 .HasForeignKey(d => d.RequisitionItemId)
                 .HasConstraintName("FK_ChallanDetails_ChequeBookRequisitions");
@@ -206,7 +204,7 @@ public partial class CRDBContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__ChequeBo__3214EC07B77056B1");
 
             entity.Property(e => e.AccountName)
-                .HasMaxLength(100)
+                .HasMaxLength(300)
                 .IsUnicode(false);
             entity.Property(e => e.AccountNo)
                 .HasMaxLength(30)
@@ -331,6 +329,20 @@ public partial class CRDBContext : DbContext
                 .HasForeignKey(d => d.ImportLogId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__FtpRequis__Impor__4C0144E4");
+        });
+
+        modelBuilder.Entity<LocalFileImport>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__LocalFil__3213E83F2826DC1D");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.FileName)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
         });
 
         modelBuilder.Entity<Menu>(entity =>

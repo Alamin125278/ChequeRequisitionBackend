@@ -71,35 +71,72 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
 
 
     public async Task<IEnumerable<UserDto>> GetAllAsync(
-     int? BankId = null,
-     int? BranchId = null,
-     int? RoleId = null,
-     int Skip = 0,
-     int Limit = 10,
-     string? Search = null,
-     bool? IsActive = null,
-     CancellationToken cancellationToken = default)
+        int? BankId = null,
+        int? BranchId = null,
+        int? RoleId = null,
+        int Skip = 0,
+        int Limit = 10,
+        string? Search = null,
+        bool? IsActive = null,
+        CancellationToken cancellationToken = default)
     {
-        var query = _cRDBContext.Users
-            .AsNoTracking()
-            .Include(x => x.BankCreatedByNavigations)
-            .Include(x => x.BankUpdatedByNavigations)
-            .Include(x => x.RoleNavigation)
-            .Include(x => x.Vendor)
-            .Include(x => x.BranchUpdatedByNavigations)
-            .Include(x => x.BranchCreatedByNavigations)
-            .Where(x => x.UserName.Contains(Search) || x.Email.Contains(Search) || x.Name.Contains(Search) || Search == null)
-               .Where(x => x.IsDelete== false)
-               .Where(x => x.IsActive == IsActive || IsActive == null)
-               .Where(x => x.BankId == BankId || BankId == null)
-               .Where(x => x.BranchId == BranchId || BranchId == null)
-               .Where(x => x.Role == RoleId || RoleId == null)
-            .OrderBy(x => x.Id)
-            .Skip(Skip)
-            .Take(Limit);
+        // Base query without search for better performance
+        var baseQuery = from user in _cRDBContext.Users.AsNoTracking()
+                        where user.IsDelete == false
+                           && (IsActive == null || user.IsActive == IsActive)
+                           && (BankId == null || user.BankId == BankId)
+                           && (BranchId == null || user.BranchId == BranchId)
+                           && (RoleId == null || user.Role == RoleId)
+                        select user;
 
-        var users = await query.ToListAsync(cancellationToken);
-        return users.Adapt<IEnumerable<UserDto>>();
+        // Apply search condition only if Search parameter is provided
+        if (!string.IsNullOrWhiteSpace(Search))
+        {
+            baseQuery = baseQuery.Where(user =>
+                user.UserName.Contains(Search) ||
+                user.Email.Contains(Search) ||
+                user.Name.Contains(Search));
+        }
+
+        // Final query with joins and projection
+        var finalQuery = from user in baseQuery
+                         join bank in _cRDBContext.Banks on user.BankId equals bank.Id into bankGroup
+                         from bank in bankGroup.DefaultIfEmpty()
+
+                         join branch in _cRDBContext.Branches on user.BranchId equals branch.Id into branchGroup
+                         from branch in branchGroup.DefaultIfEmpty()
+
+                         join role in _cRDBContext.UserRoles on user.Role equals role.Id into roleGroup
+                         from role in roleGroup.DefaultIfEmpty()
+
+                         join vendor in _cRDBContext.Vendors on user.VendorId equals vendor.Id into vendorGroup
+                         from vendor in vendorGroup.DefaultIfEmpty()
+
+                         orderby user.Id
+                         select new UserDto
+                         {
+                             Id = user.Id,
+                             BranchId = user.BranchId,
+                             BankId = user.BankId,
+                             VendorId = user.VendorId,
+                             Name = user.Name,
+                             Email = user.Email,
+                             UserName = user.UserName,
+                             ImagePath = user.ImagePath,
+                             Role = user.Role,
+                             IsActive = user.IsActive,
+                             BankName = bank.BankName ?? string.Empty,
+                             BranchName = branch.BranchName ?? string.Empty,
+                             RoleName = role.RoleName ?? string.Empty,
+                             VendorName = vendor.VendorName ?? string.Empty
+                         };
+
+        var result = await finalQuery
+            .Skip(Skip)
+            .Take(Limit)
+            .ToListAsync(cancellationToken);
+
+        return result;
     }
 
 

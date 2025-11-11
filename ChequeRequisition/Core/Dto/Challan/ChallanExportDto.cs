@@ -11,6 +11,7 @@
         public required string ChallanNumber { get; set; }
         public required bool IsAgent { get; set; }
         public string? AgentNum { get; set; }
+        public  required string ReDate { get; set; }
         public string? CusAddress { get; set; }
         public required List<ChallanItemDto> Items { get; set; }  // 👈 multiple requisitions
     }

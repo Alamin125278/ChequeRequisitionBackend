@@ -28,14 +28,9 @@ public class UserDto
     public int? Role { get; set; }
 
     public bool? IsActive { get; set; } = true;
-
-    public VendorDto? Vendor { get; set; } = null;
-    public BankDto? Bank { get; set; } = null;
-    public UserRoleDto? RoleNavigation { get; set; } = null;
-    public BranchDto? Branch { get; set; } = null;
-    public string BankName => Bank?.BankName ?? string.Empty;
-    public string RoleName => RoleNavigation?.RoleName ?? string.Empty;
-    public string BranchName=> Branch?.BranchName ?? string.Empty;
-    public string VendorName => Vendor?.VendorName ?? string.Empty;
+    public string? BankName { get; set; }
+    public string? RoleName { get; set; }
+    public string? BranchName { get; set; }
+    public string? VendorName { get; set; }
 
 }

@@ -5,7 +5,7 @@ using ChequeRequisiontService.Core.Interfaces.Repositories;
 
 namespace ChequeRequisiontService.Endpoints.Branch.GetAllBranch
 {
-    public record GetAllBranchQuery(int Skip = 0, int Limit = 10, string? Search = null, string? IsActive = null) : IQuery<GetAllBranchResult>;
+    public record GetAllBranchQuery(int Skip = 0, int Limit = 10,int? BankId=null, string? Search = null, string? IsActive = null) : IQuery<GetAllBranchResult>;
    public record GetAllBranchResult(string Message, IEnumerable<BranchDto> BranchDtos,int TotalBranch);
     public class GetAllBranchHandler(IBranchRepo branchRepo, AuthenticatedUserInfo authenticatedUserInfo) :IQueryHandler<GetAllBranchQuery, GetAllBranchResult>
     {
@@ -13,6 +13,7 @@ namespace ChequeRequisiontService.Endpoints.Branch.GetAllBranch
         public async Task<GetAllBranchResult> Handle(GetAllBranchQuery request, CancellationToken cancellationToken)
         {
             bool? ActiveStatus = null;
+            int? bankId = null;
             if (request.IsActive == "Active")
             {
                 ActiveStatus = true;
@@ -21,8 +22,14 @@ namespace ChequeRequisiontService.Endpoints.Branch.GetAllBranch
             {
                 ActiveStatus = false;
             }
-
-            var bankId = authenticatedUserInfo.BankId;
+            if (request.BankId!=null)
+            {
+                bankId = request.BankId;
+            }
+            else
+            {
+                bankId = authenticatedUserInfo.BankId;
+            }
             var totalCount = await _branchRepo.GetAllCountAsync(request.Search, bankId, ActiveStatus, cancellationToken);
 
             var branches = await _branchRepo.GetAllAsync(bankId,request.Skip, request.Limit, request.Search,ActiveStatus, cancellationToken);
