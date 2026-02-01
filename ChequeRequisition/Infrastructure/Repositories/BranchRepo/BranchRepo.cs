@@ -112,53 +112,66 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             return data?.Adapt<BranchDto>();
         }
 
-        public async Task<BranchDto?> GetIdAsync(int bankId, string branchName, string? branchCode = null,string? IsAgent = null, CancellationToken cancellationToken = default)
+        public async Task<BranchDto?> GetIdAsync(
+    int bankId,
+    string? branchName = null,
+    string? branchCode = null,
+    string? IsAgent = null,
+    CancellationToken cancellationToken = default)
         {
+            // Base query
             var query = _cRDBContext.Branches
                 .AsNoTracking()
-                .Where(x => x.BankId == bankId && !x.IsDeleted && x.IsActive==true);
+                .Where(x => x.BankId == bankId
+         && x.IsDeleted == false
+         && x.IsActive == true);
 
-            // Handle special characters in branchName
-            var trimmedBranchName = branchName;
-            var dashIndex = branchName.IndexOf('-');
-            if (dashIndex >= 0 && IsAgent=="Agent")
+            string? trimmedBranchName = branchName;
+
+            // Handle branchName cleanup
+            if (!string.IsNullOrEmpty(branchName))
             {
-                var afterDash = branchName.Substring(dashIndex + 1).Trim();
+                if (IsAgent == "Agent")
+                {
+                    int dashIndex = branchName.IndexOf('-');
 
-                var bracketIndex = afterDash.IndexOf('(');
-                if (bracketIndex > 0)
-                {
-                    trimmedBranchName = afterDash.Substring(0, bracketIndex).Trim();
+                    if (dashIndex >= 0)
+                    {
+                        var afterDash = branchName[(dashIndex + 1)..].Trim();
+
+                        int bracketIndex = afterDash.IndexOf('(');
+                        trimmedBranchName = bracketIndex > 0
+                            ? afterDash[..bracketIndex].Trim()
+                            : afterDash;
+                    }
                 }
-                else
+                else if (branchName.Contains(','))
                 {
-                    trimmedBranchName = afterDash;
+                    trimmedBranchName = branchName[..branchName.IndexOf(',')].Trim();
                 }
             }
-            else if (branchName.Contains(','))
-            {
-                trimmedBranchName = branchName.Substring(0, branchName.IndexOf(',')).Trim();
-            }
 
-            // Apply filtering
+            // Apply filters
             if (!string.IsNullOrEmpty(branchCode))
             {
-                // Special case: branchCode is "PO" → Only filter by BranchName
                 if (branchCode == "PO")
                 {
                     query = query.Where(x =>
-                        x.BranchName!.StartsWith(trimmedBranchName));
+                        x.BranchName != null &&
+                        x.BranchName.StartsWith(trimmedBranchName));
                 }
-                // Special case:branchCode is Agent Midlad Bank Agent Branches -> Match both branchCode and branchName (partial match)
                 else if (IsAgent == "Agent")
                 {
                     query = query.Where(x =>
-                         x.BranchCode == branchCode &&
+                        x.BranchCode == branchCode &&
                         x.BranchName!.StartsWith(trimmedBranchName));
+                }
+                else if (string.IsNullOrEmpty(branchName))
+                {
+                    query = query.Where(x => x.BranchCode == branchCode);
                 }
                 else
                 {
-                    // General case: Match both branchCode and branchName (partial match)
                     query = query.Where(x =>
                         x.BranchCode == branchCode &&
                         x.BranchName!.StartsWith(trimmedBranchName));
@@ -166,16 +179,14 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             }
             else
             {
-                // ✅ When branchCode is not present, match only branchName (partial)
-                query = query.Where(x =>
-                    x.BranchName != null &&
-                    x.BranchName==branchName);
+                query = query.Where(x => x.BranchName == branchName);
             }
 
-            var data= await query.AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken);
+            var data = await query.FirstOrDefaultAsync(cancellationToken);
+
             return data?.Adapt<BranchDto>();
         }
+
 
 
         public async Task<BranchDto?> UpdateAsync(BranchDto updatedDto, int id, int userId, CancellationToken cancellationToken = default)

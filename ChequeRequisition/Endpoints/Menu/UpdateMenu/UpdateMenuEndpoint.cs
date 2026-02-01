@@ -7,7 +7,7 @@ namespace ChequeRequisiontService.Endpoints.Menu.UpdateMenu
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-           app.MapPut("/api/menu/{id}", async (int id, UpdateMenuCommand command,ISender sender,CancellationToken cancellationToken) =>
+           app.MapPatch("/api/menu/{id}", async (int id, UpdateMenuCommand command,ISender sender,CancellationToken cancellationToken) =>
             {
                 if (id != command.Id)
                 {

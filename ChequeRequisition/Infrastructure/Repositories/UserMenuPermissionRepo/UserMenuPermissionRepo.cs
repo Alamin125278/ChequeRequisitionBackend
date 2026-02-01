@@ -2,6 +2,8 @@
 using ChequeRequisiontService.Core.Dto.UserMenuPermission;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
+using ChequeRequisiontService.Models.CRDB;
+using DocumentFormat.OpenXml.InkML;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
@@ -11,6 +13,27 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.UserMenuPermission
     public class UserMenuPermissionRepo(CRDBContext cRDBContext) : IUserMenuPermissionRepo
     {
         private readonly CRDBContext _cRDBContext = cRDBContext;
+
+        public async Task BulkCreateAsync(IEnumerable<UserMenuPermission> permissions, CancellationToken cancellationToken)
+        {
+            await _cRDBContext.UserMenuPermissions
+            .AddRangeAsync(permissions, cancellationToken);
+        }
+
+        public async Task BulkSoftDeleteAsync(int userId, IEnumerable<int> menuIds, int actionBy, CancellationToken cancellationToken)
+        {
+            var permissions = await _cRDBContext.UserMenuPermissions
+            .Where(x => x.UserId == userId && menuIds.Contains(x.MenuId))
+            .ToListAsync(cancellationToken);
+
+            foreach (var permission in permissions)
+            {
+                permission.IsActive = false;
+                permission.IsDeleted = true;
+                permission.UpdatedBy = actionBy;
+                permission.UpdatedAt = DateTime.UtcNow;
+            }
+        }
 
         public bool CheckRoutePermission(List<MenuDto> menus, string path, CancellationToken cancellationToken = default)
         {
@@ -104,6 +127,33 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.UserMenuPermission
                        .AsNoTracking()
                        .ToListAsync();
             return menus;
+        }
+
+        public async Task<List<UserMenusPermissionsDto>> GetUserMenusPermissionsByUserIdAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var result = await (
+                from m in _cRDBContext.Menus.AsNoTracking()
+                join ump in _cRDBContext.UserMenuPermissions
+                    .Where(x => x.UserId == userId)
+                on m.Id equals ump.MenuId into umpJoin
+                from ump in umpJoin
+                    .OrderByDescending(u => u.Id)  // pick the first if multiple
+                    .Take(1)
+                    .DefaultIfEmpty()
+                where m.IsDeleted == false  // corrected
+                select new UserMenusPermissionsDto
+                {
+                    MenuId = m.Id,
+                    MenuName = m.MenuName!,
+                    MenuPath = m.Path!,
+                    Icon=m.Icon ?? "MenuOutlined",
+                    CanAccess = ump != null ? ump.IsActive : false,
+                }
+            )
+            .OrderBy(x => x.MenuId)
+            .ToListAsync(cancellationToken);
+
+            return result;  // ✅ must return
         }
 
         public async Task<UserMenuPermissionDto> UpdateAsync(UserMenuPermissionDto entity, int Id, int UserId, CancellationToken cancellationToken = default)

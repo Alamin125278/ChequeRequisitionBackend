@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.Menu;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -18,14 +19,14 @@ namespace ChequeRequisiontService.Endpoints.Menu.CreateMenu
             RuleFor(x => x.Path).NotEmpty().WithMessage("Path is required.");
         }
     }
-    public class CreateMenuHandler(IMenuRepo menuRepo) : ICommandHandler<CreateMenuCommand, CreateMenuResponse>
+    public class CreateMenuHandler(IMenuRepo menuRepo,AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<CreateMenuCommand, CreateMenuResponse>
     {
         private readonly IMenuRepo _menuRepo = menuRepo;
         public async Task<CreateMenuResponse> Handle(CreateMenuCommand request, CancellationToken cancellationToken)
         {
             var menu = request.Adapt<MenuDto>();
 
-            var createdMenu = await _menuRepo.CreateAsync(menu, 1, cancellationToken);
+            var createdMenu = await _menuRepo.CreateAsync(menu, authenticatedUserInfo.Id, cancellationToken);
             
             return new CreateMenuResponse(createdMenu);
         }

@@ -3,7 +3,9 @@ using ChequeRequisiontService.Core.Dto.User;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
+using DocumentFormat.OpenXml.Math;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -139,6 +141,30 @@ public class UserRepo(CRDBContext cRDBContext) : IUserRepo
         return result;
     }
 
+    public async Task<IEnumerable<UserDto>> GetAllAsync(int VendorId, CancellationToken cancellationToken = default)
+    {
+        var data = await (
+        from user in _cRDBContext.Users.AsNoTracking()
+        join role in _cRDBContext.UserRoles
+            on user.Role equals role.Id
+            into roleGroup
+        from role in roleGroup.DefaultIfEmpty() // LEFT JOIN
+        where user.VendorId == VendorId
+              && user.IsDelete == false
+              && user.IsActive == true
+        select new UserDto
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Email = user.Email,
+            UserName=user.UserName,
+            Role = user.Role,
+            RoleName = role != null ? role.RoleName : null
+        }
+    ).ToListAsync(cancellationToken);
+
+        return data;
+    }
 
     public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
     {

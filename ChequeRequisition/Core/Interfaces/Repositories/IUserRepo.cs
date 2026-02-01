@@ -11,6 +11,6 @@ public interface IUserRepo : IGenericRepository<UserDto>
     Task<int> GetAllCountAsync(int? BankId = null, int? BranchId = null, int? RoleId = null, string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default);
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     Task<bool> UpdatedPasswordAsunc(int Id,ChangedPasswordDto entity,int userId, CancellationToken cancellationToken = default);
-
+    Task<IEnumerable<UserDto>> GetAllAsync(int VendorId,CancellationToken cancellationToken = default);
 }
 

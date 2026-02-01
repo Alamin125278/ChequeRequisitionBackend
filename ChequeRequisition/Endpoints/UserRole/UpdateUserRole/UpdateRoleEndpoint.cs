@@ -7,7 +7,7 @@ namespace ChequeRequisiontService.Endpoints.UserRole.UpdateUserRole
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPut("/api/user-role/{id}", async (int id, UpdateRoleCommand command, ISender sender, CancellationToken cancellationToken) =>
+            app.MapPatch("/api/user-role/{id}", async (int id, UpdateRoleCommand command, ISender sender, CancellationToken cancellationToken) =>
             {
                 command = command with { Id = id };
                 var result = await sender.Send(command, cancellationToken);

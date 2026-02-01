@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.Menu;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -21,7 +22,7 @@ public class UpdateMenuCommandValidator : AbstractValidator<UpdateMenuCommand>
         RuleFor(x => x.IsActive).NotNull().WithMessage("IsActive must be specified.");
     }
 }
-public class UpdateMenuHandler(IMenuRepo menuRepo) : ICommandHandler<UpdateMenuCommand, UpdateMenuResponse>
+public class UpdateMenuHandler(IMenuRepo menuRepo ,AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<UpdateMenuCommand, UpdateMenuResponse>
 {
     private readonly IMenuRepo _menuRepo = menuRepo;
     public async Task<UpdateMenuResponse> Handle(UpdateMenuCommand request, CancellationToken cancellationToken)
@@ -29,7 +30,7 @@ public class UpdateMenuHandler(IMenuRepo menuRepo) : ICommandHandler<UpdateMenuC
         var menuDto = request.Adapt<MenuDto>();
         // Ensure the Id is set correctly
         var id = request.Id;
-        var updatedMenu = await _menuRepo.UpdateAsync(menuDto, id, 1, cancellationToken);
+        var updatedMenu = await _menuRepo.UpdateAsync(menuDto, id, authenticatedUserInfo.Id, cancellationToken);
         return new UpdateMenuResponse(updatedMenu);
     }
 }

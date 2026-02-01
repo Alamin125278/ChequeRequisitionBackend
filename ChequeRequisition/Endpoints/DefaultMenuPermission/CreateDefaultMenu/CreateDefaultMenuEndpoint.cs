@@ -1,4 +1,5 @@
 ﻿using Carter;
+using ChequeRequisiontService.Core.Dto.Common;
 using MediatR;
 
 namespace ChequeRequisiontService.Endpoints.DefaultMenuPermission.CreateDefaultMenu
@@ -7,10 +8,27 @@ namespace ChequeRequisiontService.Endpoints.DefaultMenuPermission.CreateDefaultM
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPost("/api/default-menu-permission", async (CreateDefaultMenuCommand command, ISender sender, CancellationToken cancellationToken) =>
+            app.MapPost("/api/default-menus-by-role", async (CreateDefaultMenuCommand command, ISender sender, CancellationToken cancellationToken) =>
              {
-                 var response = await sender.Send(command, cancellationToken);
-                 return Results.Ok(response);
+                 try
+                 {
+                     var response = await sender.Send(command, cancellationToken);
+                     return Results.Ok(new ResponseDto<CreateDefaultMenuResponse>
+                     {
+                         Success = true,
+                         Message = "Created Default Role Menus Successfully.",
+                         Data = response,
+                         StatusCode = StatusCodes.Status200OK
+                     });
+                 }
+                 catch (Exception ex)
+                 {
+                     // Log the exception here if needed
+                     return Results.Problem(
+                         detail: ex.Message,
+                         title: "An error occurred while checking the Default Role Menus",
+                         statusCode: StatusCodes.Status500InternalServerError);
+                 }
              })
              .WithName("CreateDefaultMenu")
              .WithTags("Default Menu Permission")

@@ -3,7 +3,7 @@ using ChequeRequisiontService.Core.Dto.Branch;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 
 namespace ChequeRequisiontService.Endpoints.Branch.GetBranchByCode;
-public record GetBranchByCodeQuery(int BankId,string BranchCode,string BranchName) : IQuery<GetBranchByCodeRes>;
+public record GetBranchByCodeQuery(int BankId,string BranchCode,string? BranchName=null) : IQuery<GetBranchByCodeRes>;
 public record class GetBranchByCodeRes(bool HasBranch, BranchDto? Branch);
 public class GetBranchByCodeHandler(IBranchRepo branchRepo) : IQueryHandler<GetBranchByCodeQuery, GetBranchByCodeRes>
 {

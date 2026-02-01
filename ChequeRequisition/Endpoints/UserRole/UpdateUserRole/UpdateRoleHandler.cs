@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.UserRole;
 using ChequeRequisiontService.Core.Interfaces.Repositories.IUserRole;
 using FluentValidation;
@@ -16,7 +17,7 @@ public class UpdateRoleValidator : AbstractValidator<UpdateRoleCommand>
         RuleFor(x => x.IsActive).NotNull().WithMessage("IsActive is required.");
     }
 }
-public class UpdateRoleHandler(IUserRoleRepo userRoleRepo) : ICommandHandler<UpdateRoleCommand, UpdateRoleResponse>
+public class UpdateRoleHandler(IUserRoleRepo userRoleRepo,AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<UpdateRoleCommand, UpdateRoleResponse>
 {
     private readonly IUserRoleRepo _userRoleRepo = userRoleRepo;
     
@@ -25,7 +26,7 @@ public class UpdateRoleHandler(IUserRoleRepo userRoleRepo) : ICommandHandler<Upd
         var userRole = request.Adapt<UserRoleDto>();
         var id = request.Id;
         
-        var updatedUserRole = await _userRoleRepo.UpdateAsync(userRole, id,1, cancellationToken);
+        var updatedUserRole = await _userRoleRepo.UpdateAsync(userRole, id,authenticatedUserInfo.Id, cancellationToken);
         
         return new UpdateRoleResponse(updatedUserRole);
     }

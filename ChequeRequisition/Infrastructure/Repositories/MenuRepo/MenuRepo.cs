@@ -64,6 +64,16 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.MenuRepo
             throw new NotImplementedException();
         }
 
+        public async Task<int> GetAllCountAsync(string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default)
+        {
+            var count = await _cRDBContext.Menus.AsNoTracking()
+                .Where(x => (x.MenuName.Contains(Search) || x.Title.Contains(Search)|| Search == null))
+                .Where(x => x.IsDeleted == false)
+                .Where(x => x.IsActive == IsActive || IsActive == null)
+                .CountAsync(cancellationToken);
+            return count;
+        }
+
         public async Task<MenuDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var data =await _cRDBContext.Menus.AsNoTracking()

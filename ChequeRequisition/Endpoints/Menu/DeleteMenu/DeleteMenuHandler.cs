@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
 using System.Windows.Input;
@@ -14,7 +15,7 @@ namespace ChequeRequisiontService.Endpoints.Menu.DeleteMenu
             RuleFor(x => x.Id).GreaterThan(0).WithMessage("Menu ID must be greater than 0.");
         }
     }
-    public class DeleteMenuHandler(IMenuRepo menuRepo) : ICommandHandler<DeleteMenuCommand, DeleteMenuResponse>
+    public class DeleteMenuHandler(IMenuRepo menuRepo,AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<DeleteMenuCommand, DeleteMenuResponse>
     {
         public async Task<DeleteMenuResponse> Handle(DeleteMenuCommand request, CancellationToken cancellationToken)
         {
@@ -23,7 +24,7 @@ namespace ChequeRequisiontService.Endpoints.Menu.DeleteMenu
             {
                 return new DeleteMenuResponse(false, $"Menu with ID {request.Id} not found.");
             }
-            await menuRepo.DeleteAsync(request.Id, 1, cancellationToken);
+            await menuRepo.DeleteAsync(request.Id, authenticatedUserInfo.Id, cancellationToken);
             return new DeleteMenuResponse(true, $"Menu with ID {request.Id} deleted successfully.");
         }
     }

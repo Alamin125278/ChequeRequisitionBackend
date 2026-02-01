@@ -7,13 +7,10 @@ namespace ChequeRequisiontService.Endpoints.DefaultMenuPermission.UpdateDefaultM
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPatch("/api/default-menu-permission/{id}", async (int id ,UpdateDefaultMenuCommand command, ISender sender,CancellationToken cancellationToken) =>
+            app.MapPatch("/api/default-menus-by-role", async (UpdateDefaultMenuCommand command, ISender sender,CancellationToken cancellationToken) =>
             {
-                if (id != command.Id)
-                {
-                    return Results.BadRequest("Mismatched DefaultMenuPermission ID");
-                }
-                var response = await sender.Send(command with { Id = id }, cancellationToken);
+                
+                var response = await sender.Send(command , cancellationToken);
                 return Results.Ok(response);
             }).WithName("UpdateDefaultMenu")
               .Produces<UpdateDefaultMenuResponse>(StatusCodes.Status200OK)

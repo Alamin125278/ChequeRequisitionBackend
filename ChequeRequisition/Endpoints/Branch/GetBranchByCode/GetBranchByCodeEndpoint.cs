@@ -8,7 +8,7 @@ public class GetBranchByCodeEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/branch/get-by-branch-code", async (int bankId,string branchCode,string branchName,ISender sender, CancellationToken cancellationToken) =>
+        app.MapGet("/api/branch/get-by-branch-code", async (int bankId,string branchCode,string? branchName,ISender sender, CancellationToken cancellationToken) =>
         {
             var query = new GetBranchByCodeQuery(bankId, branchCode, branchName);
             var result = await sender.Send(query, cancellationToken);

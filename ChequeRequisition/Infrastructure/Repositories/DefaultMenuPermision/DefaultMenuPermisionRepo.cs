@@ -2,6 +2,7 @@
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
+using DocumentFormat.OpenXml.InkML;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -78,6 +79,29 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermisi
             throw new NotImplementedException();
         }
 
+        public async Task<IEnumerable<DefaultMenuPermissionByRoleDto>> GetAllMenuByRoleAsync(
+    int roleId, CancellationToken cancellationToken = default)
+        {
+            var query =
+                from m in _cRDBContext.Menus
+                from ur in _cRDBContext.UserRoleDefaultMenuPermissions
+                    .Where(x => x.MenuId == m.Id && x.RoleId == roleId)
+                    .DefaultIfEmpty()
+                where m.IsDeleted==false
+                orderby m.MenuName
+                select new DefaultMenuPermissionByRoleDto
+                {
+                    Id = ur.Id,
+                    MenuId=m.Id,
+                    MenuName = m.MenuName,
+                    MenuPath = m.Path,
+                    HasPermission = ur != null && (ur.IsActive ?? false) && !(ur.IsDeleted ?? false)
+                };
+
+            return await query.ToListAsync(cancellationToken);
+        }
+
+
         public async Task<DefaultMenuPermisionDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var defaultMenuPermision = await _cRDBContext.UserRoleDefaultMenuPermissions
@@ -86,6 +110,14 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermisi
             if (defaultMenuPermision == null)
                 return null;
             return defaultMenuPermision.Adapt<DefaultMenuPermisionDto>();
+        }
+
+        public async Task<bool> GetRoleByDefaultMenuAsync(int Role, int Id, CancellationToken cancellationToken = default)
+        {
+           var hasPermission = await  _cRDBContext.UserRoleDefaultMenuPermissions
+                .AsNoTracking()
+                .AnyAsync(x => x.RoleId == Role && x.MenuId == Id  && x.IsDeleted == false, cancellationToken);
+            return hasPermission;
         }
 
         public async Task<DefaultMenuPermisionDto> UpdateAsync(DefaultMenuPermisionDto entity, int Id, int UserId, CancellationToken cancellationToken = default)

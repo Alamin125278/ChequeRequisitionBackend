@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.DefaultMenuPermission;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -18,7 +19,7 @@ public class UpdateDefaultMenuCommandValidator : AbstractValidator<UpdateDefault
         RuleFor(x => x.IsActive).NotNull().WithMessage("IsActive must be specified.");
     }
 }
-public class UpdateDefaultMenuHandler(IDefaultMenuPermisionRepo defaultMenuPermisionRepo):ICommandHandler<UpdateDefaultMenuCommand, UpdateDefaultMenuResponse>
+public class UpdateDefaultMenuHandler(IDefaultMenuPermisionRepo defaultMenuPermisionRepo,AuthenticatedUserInfo authenticatedUserInfo):ICommandHandler<UpdateDefaultMenuCommand, UpdateDefaultMenuResponse>
 {
     private readonly IDefaultMenuPermisionRepo _defaultMenuPermisionRepo = defaultMenuPermisionRepo;
     
@@ -27,7 +28,7 @@ public class UpdateDefaultMenuHandler(IDefaultMenuPermisionRepo defaultMenuPermi
         var defaultMenuPermisionDto = request.Adapt<DefaultMenuPermisionDto>();
         // Ensure the Id is set correctly
         var id = request.Id;
-        var updatedDefaultMenu = await _defaultMenuPermisionRepo.UpdateAsync(defaultMenuPermisionDto, id, 1, cancellationToken);
+        var updatedDefaultMenu = await _defaultMenuPermisionRepo.UpdateAsync(defaultMenuPermisionDto, id, authenticatedUserInfo.Id, cancellationToken);
         return new UpdateDefaultMenuResponse(updatedDefaultMenu);
     }
 }

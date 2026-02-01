@@ -42,12 +42,14 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
         public BranchDto? Branch { get; set; }
         public BranchDto? ReceivingBranch { get; set; }
         public string BranchName => Branch?.BranchName ?? string.Empty;
+        public string BranchCode => Branch?.BranchCode ?? string.Empty;
         public StatusDto? StatusNavigation { get; set; }
         public string StatusName => StatusNavigation?.StatusName ?? string.Empty;
 
         public UserDto? RequestedByNavigation { get; set; }
         public string RequestName => RequestedByNavigation?.Name ?? string.Empty;
         public string ReceivingBranchName => ReceivingBranch?.BranchName ?? string.Empty;
-
+        public string ReceivingBranchCode => ReceivingBranch?.BranchCode ?? string.Empty;
+        
     }
 }

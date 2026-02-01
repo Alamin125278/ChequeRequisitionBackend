@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.CQRS;
+using ChequeRequisiontService.Core.Dto.Auth;
 using ChequeRequisiontService.Core.Dto.DefaultMenuPermission;
 using ChequeRequisiontService.Core.Interfaces.Repositories;
 using FluentValidation;
@@ -19,12 +20,12 @@ public class CreateDefaultMenuValidator : AbstractValidator<CreateDefaultMenuCom
 }
 
 
-public class CreateDefaultMenuHandler(IDefaultMenuPermisionRepo defaultMenuPermisionRepo) : ICommandHandler<CreateDefaultMenuCommand, CreateDefaultMenuResponse>
+public class CreateDefaultMenuHandler(IDefaultMenuPermisionRepo defaultMenuPermisionRepo,AuthenticatedUserInfo authenticatedUserInfo) : ICommandHandler<CreateDefaultMenuCommand, CreateDefaultMenuResponse>
 {
     public async Task<CreateDefaultMenuResponse> Handle(CreateDefaultMenuCommand request, CancellationToken cancellationToken)
     {
        var defaultMenu = request.Adapt<DefaultMenuPermisionDto>();
-        var createdDefaultMenu = await defaultMenuPermisionRepo.CreateAsync(defaultMenu, 1, cancellationToken);
+        var createdDefaultMenu = await defaultMenuPermisionRepo.CreateAsync(defaultMenu, authenticatedUserInfo.Id, cancellationToken);
         return new CreateDefaultMenuResponse(createdDefaultMenu);
     }
 }

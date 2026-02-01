@@ -2,6 +2,9 @@
 using ChequeRequisiontService.Core.Interfaces.Repositories.IUserRole;
 using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Models.CRDB;
+using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Math;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -68,6 +71,29 @@ public class UserRoleRepo(CRDBContext cRDBContext) : IUserRoleRepo
             query = query.Where(x => x.Id != 1 && x.Id != 2);
         }
         var data =await query.ToListAsync(cancellationToken);
+        return data.Adapt<IEnumerable<UserRoleDto>>();
+    }
+
+    public async Task<IEnumerable<UserRoleDto>> GetAllAsync(int Skip = 0, int Limit = 10, string? Search = null, bool? IsActive = null, CancellationToken cancellationToken = default)
+    {
+        IQueryable<UserRole> query = _cRDBContext.UserRoles.AsNoTracking();
+
+        // Base filter
+        query = query.Where(x => x.IsDeleted==false);
+
+        // Filter: active/inactive
+        if (IsActive.HasValue)
+            query = query.Where(x => x.IsActive == IsActive.Value);
+
+        // Filter: search by role name
+        if (!string.IsNullOrWhiteSpace(Search))
+            query = query.Where(x => EF.Functions.Like(x.RoleName, $"%{Search}%"));
+
+        // Pagination
+        query = query.Skip(Skip).Take(Limit);
+
+        var data = await query.ToListAsync(cancellationToken);
+
         return data.Adapt<IEnumerable<UserRoleDto>>();
     }
 
