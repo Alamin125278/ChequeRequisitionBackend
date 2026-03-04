@@ -8,6 +8,7 @@ using ChequeRequisiontService.Core.Interfaces.Services.FtpServices;
 using ChequeRequisiontService.Infrastructure.Repositories.BankRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.BranchRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.ChallanRepo;
+using ChequeRequisiontService.Infrastructure.Repositories.CourierRepo;
 using ChequeRequisiontService.Infrastructure.Repositories.Dashboard;
 using ChequeRequisiontService.Infrastructure.Repositories.DefaultMenuPermision;
 using ChequeRequisiontService.Infrastructure.Repositories.FtpImportExcel;
@@ -61,5 +62,6 @@ public static class DependencyContainer
         services.AddScoped<IDashboardRepo, DashboardRepo>();
         services.AddScoped<IManageSerialRepo, ManageSerialRepo>();
         services.AddScoped<ILocalFileImportLogRepo, LocalFileImportRepo>();
+        services.AddScoped<ICourierRepo, CourierRepo>();
     }
 }

@@ -267,5 +267,25 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
             }
 
         }
+
+        public async Task<int> UpdateRequisitionSeverityAsync(List<int> Items, int Severity, int UserId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var updatedCount = await _cRDBContext.ChequeBookRequisitions
+                                   .Where(x => Items.Contains(x.Id) && x.IsDeleted == false)
+                                   .ExecuteUpdateAsync(setters => setters
+                                   .SetProperty(x => x.UpdatedAt, x => DateTime.UtcNow)
+                                   .SetProperty(x => x.UpdatedBy, x => UserId)
+                                   .SetProperty(x => x.Serverity, x => Severity),
+                                   cancellationToken);
+
+                   return updatedCount;
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception("Database update error: " + (ex.InnerException?.Message ?? ex.Message), ex);
+            }
+        }
     }
 }

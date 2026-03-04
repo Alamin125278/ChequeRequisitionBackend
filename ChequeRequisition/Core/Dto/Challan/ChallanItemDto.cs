@@ -13,4 +13,5 @@ public class ChallanItemDto
     public required int Leaves { get; set; }
     public required int Serverity { get; set; }
     public required string BranchName { get; set; }
+    public string? AccFlag { get; set; }
 }

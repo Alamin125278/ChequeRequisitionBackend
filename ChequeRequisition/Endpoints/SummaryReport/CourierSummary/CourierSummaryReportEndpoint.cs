@@ -9,11 +9,11 @@ public class CourierSummaryReportEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-       app.MapGet("/api/courier-summary-report", async (int bankId,string startDate,string endDate,int severity,bool agentType, ISender sender, CancellationToken cancellationToken) =>
+       app.MapGet("/api/courier-summary-report", async (int bankId,string startDate,string endDate,int severity,bool agentType,string? courierCode, ISender sender, CancellationToken cancellationToken) =>
        {
            try
            {
-               var result = await sender.Send(new GetCourierSummaryReportQuery(bankId, startDate, endDate, severity, agentType), cancellationToken);
+               var result = await sender.Send(new GetCourierSummaryReportQuery(bankId, startDate, endDate, severity, agentType, courierCode), cancellationToken);
 
                return Results.Ok(new ResponseDto<GetCourierSummaryReportRes>
                {

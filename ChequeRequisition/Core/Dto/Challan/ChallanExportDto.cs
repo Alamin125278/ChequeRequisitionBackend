@@ -2,6 +2,7 @@
 {
     public class ChallanExportDto
     {
+        public required int BankId { get; set; }
         public required string BankName { get; set; }
         public required string ReceivingBranchName { get; set; }
         public required string ChallanDate { get; set; }

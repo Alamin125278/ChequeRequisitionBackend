@@ -46,6 +46,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                         select new
                         {
                             requisition.Id,
+                            requisition.BankId,
                             requisition.ChequeType,
                             requisition.Leaves,
                             requisition.BookQty,
@@ -55,7 +56,9 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             challan.ChallanDate,
                             HomeBranchName = homeBranch.BranchName,
                             DeliveryBranchName = deliveryBranch.BranchName,
-                            CourierName = courier.CourierName
+                            deliveryBranchAddress = deliveryBranch.BranchAddress,
+                            deliveryBranchPhone = deliveryBranch.BranchPhone,
+                            courier.CourierName
                         };
 
             // Step 3: Execute query and do grouping in memory for better performance
@@ -75,19 +78,26 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                 .Select(g => new SummaryReportDto
                 {
                     HomeBranch = g.Key.HomeBranchName,
+                    BankId = g.First().BankId,
                     DeliveryBranch = g.Key.DeliveryBranchName,
                     ChallanNo = g.Key.ChallanNumber,
                     ChallanDate = (DateOnly)g.Key.ChallanDate,
                     IsAgent = g.Key.IsAgent??false,
                     CourierName = g.First().CourierName,
                     RequestDate = g.First().RequestDate,
+                    BranchAddress = g.First().deliveryBranchAddress,
+                    BranchPhone = g.First().deliveryBranchPhone,
 
                     // Use optimized calculation methods
+                    Sb5 = CalculateQtyFast(g, "Savings", 5),
                     Sb10 = CalculateQtyFast(g, "Savings", 10),
                     Sb20 = CalculateQtyFast(g, "Savings", 20),
                     Sb25 = CalculateQtyFast(g, "Savings", 25),
+                    Sb50 = CalculateQtyFast(g, "Savings", 50),
 
+                    Cd5 = CalculateQtyFast(g, "Current", 5),
                     Cd10 = CalculateQtyFast(g, "Current", 10),
+                    Cd20 = CalculateQtyFast(g, "Current", 20),
                     Cd25 = CalculateQtyFast(g, "Current", 25),
                     Cd50 = CalculateQtyFast(g, "Current", 50),
                     Cd100 = CalculateQtyFast(g, "Current", 100),
@@ -138,6 +148,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
      DateOnly toDate,
      int severity,
      bool agentType,
+     string? courierCode,
      CancellationToken cancellationToken = default)
     {
         try
@@ -149,6 +160,12 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     r.IsAgent == agentType &&
                     r.Serverity == severity &&
                     r.BankId == bankId);
+
+
+            if (!string.IsNullOrEmpty(courierCode))
+            {
+                baseQuery = baseQuery.Where(r => r.CourierCode == courierCode);
+            }
 
             // Step 2: Join all required tables
             var query = from requisition in baseQuery
@@ -165,6 +182,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                         select new
                         {
                             requisition.Id,
+                            requisition.BankId,
                             requisition.ChequeType,
                             requisition.Leaves,
                             requisition.BookQty,
@@ -173,7 +191,9 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             challan.ChallanNumber,
                             challan.ChallanDate,
                             DeliveryBranchName = deliveryBranch.BranchName,
-                            CourierName = courier.CourierName
+                            deliveryBranchAddress=deliveryBranch.BranchAddress,
+                            deliveryBranchPhone=deliveryBranch.BranchPhone,
+                            courier.CourierName
                         };
 
             // Step 3: Execute and load in memory
@@ -192,17 +212,24 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                 .Select(g => new SummaryReportDto
                 {
                     DeliveryBranch = g.Key.DeliveryBranchName,
+                    BankId=g.First().BankId,
                     ChallanNo = g.Key.ChallanNumber,
                     ChallanDate = (DateOnly)g.Key.ChallanDate,
                     IsAgent = g.Key.IsAgent ?? false,
                     CourierName = g.First().CourierName,
                     RequestDate = g.First().RequestDate,
+                    BranchAddress=g.First().deliveryBranchAddress,
+                    BranchPhone=g.First().deliveryBranchPhone,
 
+                    Sb5 = CalculateQtyFast(g, "Savings", 5),
                     Sb10 = CalculateQtyFast(g, "Savings", 10),
                     Sb20 = CalculateQtyFast(g, "Savings", 20),
                     Sb25 = CalculateQtyFast(g, "Savings", 25),
+                    Sb50 = CalculateQtyFast(g, "Savings", 50),
 
+                    Cd5 = CalculateQtyFast(g, "Current", 5),
                     Cd10 = CalculateQtyFast(g, "Current", 10),
+                    Cd20 = CalculateQtyFast(g, "Current", 20),
                     Cd25 = CalculateQtyFast(g, "Current", 25),
                     Cd50 = CalculateQtyFast(g, "Current", 50),
                     Cd100 = CalculateQtyFast(g, "Current", 100),

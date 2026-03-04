@@ -11,7 +11,7 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories
         Task<IEnumerable<SummaryReportDto>> GetCourierSummaryReportAsync(
             int BankId,
             DateOnly fromDate, 
-            DateOnly toDate,int Severity,bool AgentType,CancellationToken cancellationToken=default);
+            DateOnly toDate,int Severity,bool AgentType,string? CourierCode,CancellationToken cancellationToken=default);
 
         Task<IEnumerable<DailyProductionReportDto>> GetDailyProductionReportAsync(DateTime date,CancellationToken cancellationToken=default);
         Task<IEnumerable<ConsumptionReportDto>> GetConsumptionReportAsync(

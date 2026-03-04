@@ -84,6 +84,7 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                     where challanIds.Contains(challan.Id)
                     select new
                     {
+                        requisition.BankId,
                         challan.ChallanNumber,
                         challan.ChallanDate,
                         courier.CourierName,
@@ -92,7 +93,7 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                         vendor.VendorName,
                         HomeBranchName = homeBranch.BranchName,
                         ChallanBranchName = reBranch.BranchName,
-                        requisition.CusAddress,
+                        reBranch.BranchAddress,
                         requisition.AgentNum,
                         requisition.IsAgent,
                         requisition.RequestDate,
@@ -107,7 +108,8 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
                             BookQty = requisition.BookQty,
                             Leaves = requisition.Leaves,
                             Serverity = requisition.Serverity,
-                            BranchName = homeBranch.BranchName
+                            BranchName = homeBranch.BranchName,
+                            AccFlag= requisition.AccFlag
                         }
                     };
 
@@ -121,11 +123,12 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
         ChallanDate = g.First().ChallanDate.ToString(),
         CourierName = g.First().CourierName,
         CourierPhone = g.First().CourierPhone,
+        BankId=g.First().BankId,
         BankName = g.First().BankName,
         VendorName = g.First().VendorName,
         ReceivingBranchName = g.First().ChallanBranchName,
         AgentNum = g.First().AgentNum,
-        CusAddress = g.First().CusAddress,
+        CusAddress = g.First().BranchAddress,
         IsAgent = g.First().IsAgent??false,
         ReDate=g.First().RequestDate.ToString(),
         Items = g.Select(x => x.Item).ToList()

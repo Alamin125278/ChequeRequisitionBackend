@@ -20,6 +20,8 @@ public partial class CRDBContext : DbContext
 
     public virtual DbSet<Bank> Banks { get; set; }
 
+    public virtual DbSet<BankChequeRandomSerial> BankChequeRandomSerials { get; set; }
+
     public virtual DbSet<Branch> Branches { get; set; }
 
     public virtual DbSet<BranchesTemp> BranchesTemps { get; set; }
@@ -125,6 +127,15 @@ public partial class CRDBContext : DbContext
                 .HasConstraintName("FK_Banks_Vendors");
         });
 
+        modelBuilder.Entity<BankChequeRandomSerial>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__BankCheq__3214EC0722F9AA8B");
+
+            entity.Property(e => e.ChequeSerial).HasMaxLength(10);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.GeneratedNumber).HasMaxLength(10);
+        });
+
         modelBuilder.Entity<Branch>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Branches__3214EC07F3622F4C");
@@ -203,6 +214,9 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__ChequeBo__3214EC07B77056B1");
 
+            entity.Property(e => e.AccFlag)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.AccountName)
                 .HasMaxLength(300)
                 .IsUnicode(false);

@@ -3,16 +3,23 @@
 public class SummaryReportDto
 {
     public string? HomeBranch { get; set; }
+    public required int BankId { get; set; }
     public required string DeliveryBranch { get; set; }
     public required string ChallanNo { get; set; }
     public required DateOnly ChallanDate { get; set; }
     public required bool IsAgent { get; set; }
+    public required  string BranchAddress { get; set; }
+    public required string BranchPhone { get; set; }
+    public int? Sb5 { get; set; }
     public int? Sb10 { get; set; }
     public  int? Sb20 { get; set; }
     public  int? Sb25 { get; set; }
+    public  int? Sb50 { get; set; }
     public  int? Sba10 { get; set; }
     public  int? Msd10 { get; set; }
+    public  int? Cd5 { get; set; }
     public  int? Cd10 { get; set; }
+    public  int? Cd20 { get; set; }
     public  int? Cd25 { get; set; }
     public  int? Cd50 { get; set; }
     public  int? Cd100 { get; set; }

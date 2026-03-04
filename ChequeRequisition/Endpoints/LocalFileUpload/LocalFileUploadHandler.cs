@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.LocalFileUpload;
 
-public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,string CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum,string HomeBranchCode,string DeliveryBranchCode,Boolean IsAgent) :ICommand<LocalFileUploadResult>;
+public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,string CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum,string HomeBranchCode,string DeliveryBranchCode,Boolean IsAgent,string AccFlag) :ICommand<LocalFileUploadResult>;
 
 public record BulkLocalFileUploadCommand(List<LocalFileUploadCommand> Items) : ICommand<LocalFileUploadResult>;
 
@@ -90,7 +90,7 @@ public class BulkLocalFileUploadHandler(
         foreach (var item in request.Items)
         {
             int branchId;
-            if (item.ChequeType == "Payment Order" || item.ChequeType=="FDR" || item.ChequeType == "MTDR" || item.ChequeType == "POA" || item.ChequeType == "POI")
+            if (item.ChequeType == "Payment Order" || item.ChequeType=="FDR" || item.ChequeType == "MTDR" || item.ChequeType == "POA" || item.ChequeType == "POI" || item.BankId==8)
             {
                  var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO",null, cancellationToken);
                 branchId = branch != null ? branch.Id : 0;
