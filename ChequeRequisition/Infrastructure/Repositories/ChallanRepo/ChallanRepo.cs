@@ -71,74 +71,112 @@ public class ChallanRepo(CRDBContext cRDBContext) : IChallanRepo
         }
     }
 
-    public async Task<List<ChallanExportDto>> GetChallanExportDataAsync(List<int> challanIds, CancellationToken cancellationToken)
+    public async Task<List<ChallanExportDto>> GetChallanExportDataAsync(
+     List<int> challanIds,
+     CancellationToken cancellationToken)
     {
-        var query = from challan in _cRDBContext.Challans.AsNoTracking()
-                    join tracking in _cRDBContext.ChallanDetails on challan.Id equals tracking.ChallanId
-                    join requisition in _cRDBContext.ChequeBookRequisitions on tracking.RequisitionItemId equals requisition.Id
-                    join homeBranch in _cRDBContext.Branches on requisition.BranchId equals homeBranch.Id
-                    join reBranch in _cRDBContext.Branches on challan.ReceivingBranch equals reBranch.Id
-                    join bank in _cRDBContext.Banks on requisition.BankId equals bank.Id
-                    join vendor in _cRDBContext.Vendors on requisition.VendorId equals vendor.Id
-                    join courier in _cRDBContext.Couriers on requisition.CourierCode equals courier.CourierCode
-                    where challanIds.Contains(challan.Id)
-                    select new
-                    {
-                        requisition.BankId,
-                        challan.ChallanNumber,
-                        challan.ChallanDate,
-                        courier.CourierName,
-                        CourierPhone=courier.Phone,
-                        bank.BankName,
-                        vendor.VendorName,
-                        HomeBranchName = homeBranch.BranchName,
-                        ChallanBranchName = reBranch.BranchName,
-                        reBranch.BranchAddress,
-                        requisition.AgentNum,
-                        requisition.IsAgent,
-                        requisition.RequestDate,
-                        Item = new ChallanItemDto
-                        {
-                            ItemId = requisition.Id,
-                            AccountNo = requisition.AccountNo,
-                            AccountName = requisition.AccountName,
-                            StartNo = requisition.StartNo,
-                            EndNo = requisition.EndNo,
-                            ChequeType = requisition.ChequeType,
-                            BookQty = requisition.BookQty,
-                            Leaves = requisition.Leaves,
-                            Serverity = requisition.Serverity,
-                            BranchName = homeBranch.BranchName,
-                            AccFlag= requisition.AccFlag
-                        }
-                    };
+        var query =
+            from challan in _cRDBContext.Challans.AsNoTracking()
+
+            join tracking in _cRDBContext.ChallanDetails
+                on challan.Id equals tracking.ChallanId
+
+            join requisition in _cRDBContext.ChequeBookRequisitions
+                on tracking.RequisitionItemId equals requisition.Id
+
+            join homeBranch in _cRDBContext.Branches
+                on requisition.BranchId equals homeBranch.Id
+
+            join reBranch in _cRDBContext.Branches
+                on challan.ReceivingBranch equals reBranch.Id
+
+            join bank in _cRDBContext.Banks
+                on requisition.BankId equals bank.Id into bankGroup
+            from bank in bankGroup.DefaultIfEmpty()
+
+            join vendor in _cRDBContext.Vendors
+                on requisition.VendorId equals vendor.Id into vendorGroup
+            from vendor in vendorGroup.DefaultIfEmpty()
+
+            join courier in _cRDBContext.Couriers
+                on requisition.CourierCode equals courier.CourierCode into courierGroup
+            from courier in courierGroup.DefaultIfEmpty()
+
+            where challanIds.Contains(challan.Id)
+
+            select new
+            {
+                requisition.BankId,
+                challan.ChallanNumber,
+                challan.ChallanDate,
+
+                CourierName = courier != null ? courier.CourierName : "",
+                CourierPhone = courier != null ? courier.Phone : "",
+
+                BankName = bank != null ? bank.BankName : "",
+                VendorName = vendor != null ? vendor.VendorName : "",
+
+                HomeBranchName = homeBranch.BranchName,
+                ChallanBranchName = reBranch.BranchName,
+                reBranch.BranchAddress,
+
+                requisition.AgentNum,
+                requisition.IsAgent,
+                requisition.RequestDate,
+
+                Item = new ChallanItemDto
+                {
+                    ItemId = requisition.Id,
+                    AccountNo = requisition.AccountNo,
+                    AccountName = requisition.AccountName,
+                    StartNo = requisition.StartNo,
+                    EndNo = requisition.EndNo,
+                    ChequeType = requisition.ChequeType,
+                    BookQty = requisition.BookQty,
+                    Leaves = requisition.Leaves,
+                    Serverity = requisition.Serverity,
+                    BranchName = homeBranch.BranchName,
+                    AccFlag = requisition.AccFlag
+                }
+            };
 
         var rawData = await query.ToListAsync(cancellationToken);
 
-        var grouped = rawData
-    .GroupBy(x => x.ChallanNumber)
-    .Select(g => new ChallanExportDto
-    {
-        ChallanNumber = g.Key,
-        ChallanDate = g.First().ChallanDate.ToString(),
-        CourierName = g.First().CourierName,
-        CourierPhone = g.First().CourierPhone,
-        BankId=g.First().BankId,
-        BankName = g.First().BankName,
-        VendorName = g.First().VendorName,
-        ReceivingBranchName = g.First().ChallanBranchName,
-        AgentNum = g.First().AgentNum,
-        CusAddress = g.First().BranchAddress,
-        IsAgent = g.First().IsAgent??false,
-        ReDate=g.First().RequestDate.ToString(),
-        Items = g.Select(x => x.Item).ToList()
-    })
-    .ToList();
+        // 🔍 Debug (optional)
+        // Console.WriteLine($"Raw count: {rawData.Count}");
 
+        var grouped = rawData
+            .GroupBy(x => x.ChallanNumber)
+            .Select(g =>
+            {
+                var first = g.First();
+
+                return new ChallanExportDto
+                {
+                    ChallanNumber = g.Key,
+                    ChallanDate = first.ChallanDate.ToString(),
+
+                    CourierName = first.CourierName,
+                    CourierPhone = first.CourierPhone,
+
+                    BankId = first.BankId,
+                    BankName = first.BankName,
+                    VendorName = first.VendorName,
+
+                    ReceivingBranchName = first.ChallanBranchName,
+                    CusAddress = first.BranchAddress,
+
+                    AgentNum = first.AgentNum,
+                    IsAgent = first.IsAgent ?? false,
+                    ReDate = first.RequestDate.ToString(),
+
+                    Items = g.Select(x => x.Item).ToList()
+                };
+            })
+            .ToList();
 
         return grouped;
     }
-
     public async Task<IEnumerable<ChallanDto>> GetAllAsync(
      int? BankId,
      int? BranchId,

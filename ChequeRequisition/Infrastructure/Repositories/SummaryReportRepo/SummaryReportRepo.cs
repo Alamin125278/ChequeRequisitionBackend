@@ -110,10 +110,17 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
                     Sba10 = CalculateQtyFast(g, "SBA", 10),
                     Msd10 = CalculateQtyFast(g, "MSD", 10),
+                    Msd50 = CalculateQtyFast(g, "MSD", 50),
 
                     Cda25 = CalculateQtyFast(g, "CDA", 25),
+                    Acd25 = CalculateQtyFast(g, "ACD", 25),
+                    Acd50 = CalculateQtyFast(g, "ACD", 50),
+                    Acd100 = CalculateQtyFast(g, "ACD", 100),
                     Awcd25 = CalculateQtyFast(g, "AWCD", 25),
                     Sna25 = CalculateQtyFast(g, "SNA", 25),
+                    Snd25 = CalculateQtyFast(g, "SND", 25),
+                    Snd50 = CalculateQtyFast(g, "SND", 50),
+                    Snd100 = CalculateQtyFast(g, "SND", 100),
                     Msnd25 = CalculateQtyFast(g, "MSND", 25),
 
                     Poa50 = CalculateQtyFast(g, "POA", 50),
@@ -242,10 +249,17 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
                     Sba10 = CalculateQtyFast(g, "SBA", 10),
                     Msd10 = CalculateQtyFast(g, "MSD", 10),
+                    Msd50 = CalculateQtyFast(g, "MSD", 50),
 
                     Cda25 = CalculateQtyFast(g, "CDA", 25),
+                    Acd25 = CalculateQtyFast(g, "ACD", 25),
+                    Acd50 = CalculateQtyFast(g, "ACD", 50),
+                    Acd100 = CalculateQtyFast(g, "ACD", 100),
                     Awcd25 = CalculateQtyFast(g, "AWCD", 25),
                     Sna25 = CalculateQtyFast(g, "SNA", 25),
+                    Snd25 = CalculateQtyFast(g, "SND", 25),
+                    Snd50 = CalculateQtyFast(g, "SND", 50),
+                    Snd100 = CalculateQtyFast(g, "SND", 100),
                     Msnd25 = CalculateQtyFast(g, "MSND", 25),
 
                     Poa50 = CalculateQtyFast(g, "POA", 50),
@@ -350,6 +364,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             requisition.Leaves,
                             requisition.BookQty,
                             requisition.RequestDate,
+                            requisition.AccFlag
                         };
 
             // Step 3: Execute query and do grouping in memory for better performance
@@ -367,6 +382,30 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     RequestDate = g.First().RequestDate,
 
                     // Use optimized calculation methods
+                    Csbcd5Books = CalculateQtyFast(g, "", 5,"General"),
+                    Csbcd5Leaves = CalculateLeavesFast(g, "", 5,"General"),
+                    Csbcd10Books = CalculateQtyFast(g, "", 10,"General"),
+                    Csbcd10Leaves = CalculateLeavesFast(g, "", 10,"General"),
+                    Csbcd20Books = CalculateQtyFast(g, "", 20,"General"),
+                    Csbcd20Leaves = CalculateLeavesFast(g, "", 20,"General"),
+                    Csbcd50Books = CalculateQtyFast(g, "", 50,"General"),
+                    Csbcd50Leaves = CalculateLeavesFast(g, "", 50,"General"),
+                    Isbcd5Books= CalculateQtyFast(g, "", 5, "Islamic"),
+                    Isbcd5Leaves = CalculateLeavesFast(g, "", 5, "Islamic"),
+                    Isbcd10Books = CalculateQtyFast(g, "", 10, "Islamic"),
+                    Isbcd10Leaves = CalculateLeavesFast(g, "", 10, "Islamic"),
+                    Isbcd20Books = CalculateQtyFast(g, "", 20, "Islamic"),
+                    Isbcd20Leaves = CalculateLeavesFast(g, "", 20, "Islamic"),
+                    Isbcd50Books = CalculateQtyFast(g, "", 50, "Islamic"),
+                    Isbcd50Leaves = CalculateLeavesFast(g, "", 50, "Islamic"),
+                    Psbcd5Books = CalculateQtyFast(g, "", 5, "Prority"),
+                    Psbcd5Leaves = CalculateLeavesFast(g, "", 5, "Prority"),
+                    Psbcd10Books = CalculateQtyFast(g, "", 10, "Prority"),
+                    Psbcd10Leaves = CalculateLeavesFast(g, "", 10, "Prority"),
+                    Psbcd20Books = CalculateQtyFast(g, "", 20, "Prority"),
+                    Psbcd20Leaves = CalculateLeavesFast(g, "", 20, "Prority"),
+                    Psbcd50Books = CalculateQtyFast(g, "", 50, "Prority"),
+                    Psbcd50Leaves = CalculateLeavesFast(g, "", 50, "Prority"),
                     Sb10Books = CalculateQtyFast(g, "Savings", 10),
                     Sb10Leaves = CalculateLeavesFast(g, "Savings", 10),
                     Sb20Books = CalculateQtyFast(g, "Savings", 20),
@@ -374,6 +413,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Sb25Books = CalculateQtyFast(g, "Savings", 25),
                     Sb25Leaves = CalculateLeavesFast(g, "Savings", 25),
 
+                   
                     Cd10Books = CalculateQtyFast(g, "Current", 10),
                     Cd10Leaves = CalculateLeavesFast(g, "Current", 10),
                     Cd25Books = CalculateQtyFast(g, "Current", 25),
@@ -397,12 +437,26 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Sba10Leaves = CalculateLeavesFast(g, "SBA", 10),
                     Msd10Books = CalculateQtyFast(g, "MSD", 10),
                     Msd10Leaves = CalculateLeavesFast(g, "MSD", 10),
+                    Msd50Books = CalculateQtyFast(g, "MSD", 50),
+                    Msd50Leaves = CalculateLeavesFast(g, "MSD", 50),
 
 
                     Cda25Books = CalculateQtyFast(g, "CDA", 25),
                     Cda25Leaves = CalculateLeavesFast(g, "CDA", 25),
+                    Acd25Books = CalculateQtyFast(g, "ACD", 25),
+                    Acd25Leaves = CalculateLeavesFast(g, "ACD", 25),
+                    Acd50Books = CalculateQtyFast(g, "ACD", 50),
+                    Acd50Leaves = CalculateLeavesFast(g, "ACD", 50),
+                    Acd100Books = CalculateQtyFast(g, "ACD", 100),
+                    Acd100Leaves = CalculateLeavesFast(g, "ACD", 100),
                     Awcd25Books = CalculateQtyFast(g, "AWCD", 25),
                     Awcd25Leaves = CalculateLeavesFast(g, "AWCD", 25),
+                    Snd25Books = CalculateQtyFast(g, "SND", 25),
+                    Snd25Leaves = CalculateLeavesFast(g, "SND", 25),
+                    Snd50Books = CalculateQtyFast(g, "SND", 50),
+                    Snd50Leaves = CalculateLeavesFast(g, "SND", 50),
+                    Snd100Books = CalculateQtyFast(g, "SND", 100),
+                    Snd100Leaves = CalculateLeavesFast(g, "SND", 100),
                     Sna25Books = CalculateQtyFast(g, "SNA", 25),
                     Sna25Leaves = CalculateLeavesFast(g, "SNA", 25),
                     Msnd25Books = CalculateQtyFast(g, "MSND", 25),
@@ -435,16 +489,28 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
     }
 
     // Optimized calculation method using Where instead of ternary in Sum
-    private static int CalculateQtyFast(IEnumerable<dynamic> group, string chequeType, int leaves)
+    private static int CalculateQtyFast(IEnumerable<dynamic> group, string? chequeType, int leaves, string? accFlag=null)
     {
+        if (!string.IsNullOrEmpty(accFlag))
+        {
+            return group
+                .Where(x => x.Leaves == leaves && x.AccFlag == accFlag)
+                .Sum(x => x.BookQty);
+        }
         return group
             .Where(x => x.ChequeType == chequeType && x.Leaves == leaves)
             .Sum(x => x.BookQty);
     }
 
     // Optimized calculation method using Where instead of ternary in Sum
-    private static int? CalculateLeavesFast(IGrouping<dynamic, dynamic> group, string chequeType, int leaves)
+    private static int? CalculateLeavesFast(IGrouping<dynamic, dynamic> group, string? chequeType, int leaves, string? accFlag = null)
     {
+        if (!string.IsNullOrEmpty(accFlag))
+        {
+             return group
+                .Where(x => x.Leaves == leaves && x.AccFlag == accFlag)
+                .Sum(x => (int?)x.BookQty * (int?)x.Leaves);
+        }
         return group
             .Where(x => x.ChequeType == chequeType && x.Leaves == leaves)
             .Sum(x => (int?)x.BookQty * (int?)x.Leaves);

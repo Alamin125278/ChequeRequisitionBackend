@@ -17,6 +17,7 @@ public class SummaryReportDto
     public  int? Sb50 { get; set; }
     public  int? Sba10 { get; set; }
     public  int? Msd10 { get; set; }
+    public int? Msd50 { get; set; }
     public  int? Cd5 { get; set; }
     public  int? Cd10 { get; set; }
     public  int? Cd20 { get; set; }
@@ -24,8 +25,14 @@ public class SummaryReportDto
     public  int? Cd50 { get; set; }
     public  int? Cd100 { get; set; }
     public  int? Cda25 { get; set; }
+    public int? Acd25 { get; set; }
+    public int? Acd50 { get; set; }
+    public int? Acd100 { get; set; }
     public  int? Awcd25 { get; set; }
     public  int? Sna25 { get; set; }
+    public  int? Snd25 { get; set; }
+    public  int? Snd50 { get; set; }
+    public  int? Snd100 { get; set; }
     public  int? Msnd25 { get; set; }
     public  int? Po50 { get; set; }
     public  int? Po100 { get; set; }

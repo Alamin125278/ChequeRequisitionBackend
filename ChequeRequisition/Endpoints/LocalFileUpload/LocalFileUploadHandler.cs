@@ -90,7 +90,7 @@ public class BulkLocalFileUploadHandler(
         foreach (var item in request.Items)
         {
             int branchId;
-            if (item.ChequeType == "Payment Order" || item.ChequeType=="FDR" || item.ChequeType == "MTDR" || item.ChequeType == "POA" || item.ChequeType == "POI" || item.BankId==8)
+            if (item.ChequeType == "Payment Order" || item.ChequeType=="FDR" || item.ChequeType == "MTDR" || item.ChequeType == "POA" || item.ChequeType == "POI" || item.BankId==8||item.BankId==6)
             {
                  var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO",null, cancellationToken);
                 branchId = branch != null ? branch.Id : 0;
