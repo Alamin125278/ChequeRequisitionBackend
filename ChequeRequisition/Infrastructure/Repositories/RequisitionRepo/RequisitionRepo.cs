@@ -67,108 +67,212 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
         }
 
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
-     int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
-     DateOnly? RequestDate, bool? IsAgent = null, int Skip = 0, int Limit = 10,
-     string? Search = null, CancellationToken cancellationToken = default)
+int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
+DateOnly? RequestDate, bool? IsAgent = null,
+int Skip = 0, int Limit = 10,
+string? Search = null,
+CancellationToken cancellationToken = default)
         {
-            // Get all matching Requisition IDs by ChallanNumber if search exists
-            List<int> requisitionIdsFromChallan = new();
+            // 1️⃣ মূল query তৈরি
+            var query = _cRDBContext.ChequeBookRequisitions
+                .AsNoTracking()
+                .Where(r => !r.IsDeleted
+                            && (Status == null || r.Status == Status)
+                            && (BankId == null || r.BankId == BankId)
+                            && (BranchId == null || r.BranchId == BranchId)
+                            && (VendorId == null || r.VendorId == VendorId)
+                            && (Severity == null || r.Serverity == Severity)
+                            && (RequestDate == null || r.RequestDate == RequestDate)
+                            && (IsAgent == null || r.IsAgent == IsAgent)
+                            && (string.IsNullOrEmpty(Search)
+                                || (r.AccountNo != null && r.AccountNo.Contains(Search))
+                                || r.AccountName.Contains(Search)
+                                || _cRDBContext.Challans
+                                   .Any(c => _cRDBContext.ChallanDetails
+                                                .Any(d => d.RequisitionItemId == r.Id && d.ChallanId == c.Id)
+                                             && c.ChallanNumber.Contains(Search))))
+                .OrderByDescending(r => r.Id); // ✅ DESC ঠিকভাবে database-level এ
 
-            if (!string.IsNullOrEmpty(Search))
-            {
-                requisitionIdsFromChallan = await (
-                    from d in _cRDBContext.ChallanDetails
-                    join c in _cRDBContext.Challans on d.ChallanId equals c.Id
-                    where d.RequisitionItemId.HasValue &&
-                          c.ChallanNumber.Contains(Search)
-                    select d.RequisitionItemId.Value
-                ).Distinct().ToListAsync(cancellationToken);
-            }
-
-            // Now filter ChequeBookRequisitions
-            var data = await _cRDBContext.ChequeBookRequisitions.AsNoTracking()
-                .Include(x => x.Bank)
-                .Include(x => x.Branch)
-                .Include(x => x.ReceivingBranch)
-                .Include(x => x.StatusNavigation)
-                .Include(x => x.RequestedByNavigation)
-                .Where(x =>
-                    string.IsNullOrEmpty(Search) ||
-                    (x.AccountNo != null && x.AccountNo.Contains(Search)) ||x.AccountName.Contains(Search)||
-                    requisitionIdsFromChallan.Contains(x.Id)
-                )
-                .Where(x => x.IsDeleted == false)
-                .Where(x => x.Status == Status || Status == null)
-                .Where(x => x.BankId == BankId || BankId == null)
-                .Where(x => x.BranchId == BranchId || BranchId == null)
-                .Where(x => x.Serverity == Severity || Severity == null)
-                .Where(x => x.RequestDate == RequestDate || RequestDate == null)
-                .Where(x => IsAgent == null || x.IsAgent == IsAgent)
-                .Where(x => x.VendorId == VendorId || VendorId == null)
-                .OrderByDescending(x => x.Id)
+            // 2️⃣ Skip + Take (Pagination)
+            var pagedRequisitions = await query
                 .Skip(Skip)
                 .Take(Limit)
                 .ToListAsync(cancellationToken);
 
-            // Map to DTO
-            var dtos = data.Adapt<List<RequisitionDto>>();
+            // 3️⃣ Related data fetch করা (joins safer way)
+            var requisitionIds = pagedRequisitions.Select(r => r.Id).ToList();
 
-            // Fetch ChallanNumbers if needed
-            var idsForChallan = dtos
-                .Where(x => x.Status is not (1 or 2 or 3))
-                .Select(x => x.Id)
+            var joinedData = await (
+                from r in _cRDBContext.ChequeBookRequisitions
+                join b in _cRDBContext.Banks on r.BankId equals b.Id into rb
+                from b in rb.DefaultIfEmpty()
+                join br in _cRDBContext.Branches on r.BranchId equals br.Id into rbr
+                from br in rbr.DefaultIfEmpty()
+                join rbrc in _cRDBContext.Branches on r.ReceivingBranchId equals rbrc.Id into rrbr
+                from rbrc in rrbr.DefaultIfEmpty()
+                join s in _cRDBContext.Statuses on r.Status equals s.Id into rs
+                from s in rs.DefaultIfEmpty()
+                join u in _cRDBContext.Users on r.RequestedBy equals u.Id into ru
+                from u in ru.DefaultIfEmpty()
+                join d in _cRDBContext.ChallanDetails on r.Id equals d.RequisitionItemId into rd
+                from d in rd.DefaultIfEmpty()
+                join c in _cRDBContext.Challans on d.ChallanId equals c.Id into rc
+                from c in rc.DefaultIfEmpty()
+                where requisitionIds.Contains(r.Id)
+                select new { r, b, br, rbrc, s, u, c }
+            ).ToListAsync(cancellationToken);
+
+            // 4️⃣ Map to DTO
+            var result = joinedData
+                .GroupBy(x => x.r.Id) // duplicate remove
+                .Select(g => {
+                    var e = g.OrderByDescending(x => x.r.Id).First(); // DESC-safe
+                    return new RequisitionDto
+                    {
+                        Id = e.r.Id,
+                        BankId = e.r.BankId,
+                        BranchId = e.r.BranchId,
+                        AccountNo = e.r.AccountNo,
+                        RoutingNo = e.r.RoutingNo,
+                        StartNo = e.r.StartNo,
+                        EndNo = e.r.EndNo,
+                        ChequeType = e.r.ChequeType,
+                        ChequePrefix = e.r.ChequePrefix,
+                        MicrNo = e.r.MicrNo,
+                        Series = e.r.Series,
+                        AccountName = e.r.AccountName,
+                        CusAddress = e.r.CusAddress,
+                        BookQty = e.r.BookQty,
+                        TransactionCode = e.r.TransactionCode,
+                        Leaves = e.r.Leaves,
+                        CourierCode = e.r.CourierCode,
+                        ReceivingBranchId = e.r.ReceivingBranchId,
+                        RequestDate = e.r.RequestDate.ToString("MM/dd/yyyy"),
+                        Serverity = e.r.Serverity,
+                        Remarks = e.r.Remarks,
+                        AgentNum = e.r.AgentNum,
+                        IsAgent = e.r.IsAgent ?? false, // ✅ Null-safe
+                        AccFlag = e.r.AccFlag,
+                        Status = e.r.Status,
+                        IsDeleted = e.r.IsDeleted,
+
+                        ChallanNumber = e.c?.ChallanNumber,
+                        BankName = e.b?.BankName,
+                        BranchName = e.br?.BranchName,
+                        BranchCode = e.br?.BranchCode,
+                        StatusName = e.s?.StatusName,
+                        RequestName = e.u?.Name,
+                        ReceivingBranchName = e.rbrc?.BranchName,
+                        ReceivingBranchCode = e.rbrc?.BranchCode
+                    };
+                })
                 .ToList();
 
-            if (idsForChallan.Any())
-            {
-                var challans = await (
-                    from d in _cRDBContext.ChallanDetails
-                    join c in _cRDBContext.Challans on d.ChallanId equals c.Id
-                    where d.RequisitionItemId.HasValue && idsForChallan.Contains(d.RequisitionItemId.Value)
-                    select new { d.RequisitionItemId, c.ChallanNumber }
-                ).ToListAsync(cancellationToken);
-
-                var challanMap = challans
-    .GroupBy(x => x.RequisitionItemId)
-    .ToDictionary(g => g.Key, g => g.First().ChallanNumber);
-
-                foreach (var dto in dtos)
-                {
-                    if (challanMap.TryGetValue(dto.Id, out var challanNo))
-                        dto.ChallanNumber = challanNo;
-                }
-            }
-
-            return dtos;
+            return result;
         }
 
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
      int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
      DateOnly? RequestDate,
-     string? Search = null,bool? IsAgent=null, CancellationToken cancellationToken = default)
+     string? Search = null, bool? IsAgent = null,
+     CancellationToken cancellationToken = default)
         {
-            var requisitions = await _cRDBContext.ChequeBookRequisitions
-                                .AsNoTracking()
-                                .Include(x => x.Bank)
-                                .Include(x => x.Branch)
-                                .Include(x => x.ReceivingBranch)
-                                .Include(x => x.StatusNavigation)
-                                .Include(x => x.RequestedByNavigation)
-                                .Where(x => !x.IsDeleted)
-                                .Where(x => string.IsNullOrEmpty(Search) || x.AccountNo.Contains(Search)||x.AccountName.Contains(Search))
-                                .Where(x => !Status.HasValue || x.Status == Status)
-                                .Where(x => !BankId.HasValue || x.BankId == BankId)
-                                .Where(x => !VendorId.HasValue || x.VendorId == VendorId)
-                                .Where(x => !BranchId.HasValue || x.BranchId == BranchId)
-                                .Where(x => !Severity.HasValue || x.Serverity == Severity)
-                                .Where(x => IsAgent == null || x.IsAgent == IsAgent)
-                                .Where(x => !RequestDate.HasValue || x.RequestDate == RequestDate)
-                                .ToListAsync(cancellationToken);
+            // 1️⃣ মূল query তৈরি
+            var query = _cRDBContext.ChequeBookRequisitions
+                .AsNoTracking()
+                .Where(r => !r.IsDeleted
+                            && (Status == null || r.Status == Status)
+                            && (BankId == null || r.BankId == BankId)
+                            && (BranchId == null || r.BranchId == BranchId)
+                            && (VendorId == null || r.VendorId == VendorId)
+                            && (Severity == null || r.Serverity == Severity)
+                            && (RequestDate == null || r.RequestDate == RequestDate)
+                            && (IsAgent == null || r.IsAgent == IsAgent)
+                            && (string.IsNullOrEmpty(Search)
+                                || (r.AccountNo != null && r.AccountNo.Contains(Search))
+                                || r.AccountName.Contains(Search)
+                                || _cRDBContext.Challans
+                                   .Any(c => _cRDBContext.ChallanDetails
+                                                .Any(d => d.RequisitionItemId == r.Id && d.ChallanId == c.Id)
+                                             && c.ChallanNumber.Contains(Search))))
+                .OrderByDescending(r => r.Id); // ✅ DESC ঠিকভাবে database-level এ
 
-            // Step 2: Map to DTO
-            var dtos = requisitions.Adapt<List<RequisitionDto>>();
-            return dtos;
+            // 2️⃣ Skip + Take (Pagination)
+            var pagedRequisitions = await query
+                .ToListAsync(cancellationToken);
+
+            // 3️⃣ Related data fetch করা (joins safer way)
+            var requisitionIds = pagedRequisitions.Select(r => r.Id).ToList();
+
+            var joinedData = await (
+                from r in _cRDBContext.ChequeBookRequisitions
+                join b in _cRDBContext.Banks on r.BankId equals b.Id into rb
+                from b in rb.DefaultIfEmpty()
+                join br in _cRDBContext.Branches on r.BranchId equals br.Id into rbr
+                from br in rbr.DefaultIfEmpty()
+                join rbrc in _cRDBContext.Branches on r.ReceivingBranchId equals rbrc.Id into rrbr
+                from rbrc in rrbr.DefaultIfEmpty()
+                join s in _cRDBContext.Statuses on r.Status equals s.Id into rs
+                from s in rs.DefaultIfEmpty()
+                join u in _cRDBContext.Users on r.RequestedBy equals u.Id into ru
+                from u in ru.DefaultIfEmpty()
+                join d in _cRDBContext.ChallanDetails on r.Id equals d.RequisitionItemId into rd
+                from d in rd.DefaultIfEmpty()
+                join c in _cRDBContext.Challans on d.ChallanId equals c.Id into rc
+                from c in rc.DefaultIfEmpty()
+                where requisitionIds.Contains(r.Id)
+                select new { r, b, br, rbrc, s, u, c }
+            ).ToListAsync(cancellationToken);
+
+            // 4️⃣ Map to DTO
+            var result = joinedData
+                .GroupBy(x => x.r.Id) // duplicate remove
+                .Select(g => {
+                    var e = g.OrderByDescending(x => x.r.Id).First(); // DESC-safe
+                    return new RequisitionDto
+                    {
+                        Id = e.r.Id,
+                        BankId = e.r.BankId,
+                        BranchId = e.r.BranchId,
+                        AccountNo = e.r.AccountNo,
+                        RoutingNo = e.r.RoutingNo,
+                        StartNo = e.r.StartNo,
+                        EndNo = e.r.EndNo,
+                        ChequeType = e.r.ChequeType,
+                        ChequePrefix = e.r.ChequePrefix,
+                        MicrNo = e.r.MicrNo,
+                        Series = e.r.Series,
+                        AccountName = e.r.AccountName,
+                        CusAddress = e.r.CusAddress,
+                        BookQty = e.r.BookQty,
+                        TransactionCode = e.r.TransactionCode,
+                        Leaves = e.r.Leaves,
+                        CourierCode = e.r.CourierCode,
+                        ReceivingBranchId = e.r.ReceivingBranchId,
+                        RequestDate = e.r.RequestDate.ToString("MM/dd/yyyy"),
+                        Serverity = e.r.Serverity,
+                        Remarks = e.r.Remarks,
+                        AgentNum = e.r.AgentNum,
+                        IsAgent = e.r.IsAgent ?? false, // ✅ Null-safe
+                        AccFlag = e.r.AccFlag,
+                        Status = e.r.Status,
+                        IsDeleted = e.r.IsDeleted,
+
+                        ChallanNumber = e.c?.ChallanNumber,
+                        BankName = e.b?.BankName,
+                        BranchName = e.br?.BranchName,
+                        BranchCode = e.br?.BranchCode,
+                        StatusName = e.s?.StatusName,
+                        RequestName = e.u?.Name,
+                        ReceivingBranchName = e.rbrc?.BranchName,
+                        ReceivingBranchCode = e.rbrc?.BranchCode
+                    };
+                })
+                .ToList();
+
+            return result;
         }
+
 
         public Task<int> GetAllCountAsync(string? Search = null, CancellationToken cancellationToken = default)
         {
