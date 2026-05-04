@@ -200,7 +200,8 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             DeliveryBranchName = deliveryBranch.BranchName,
                             deliveryBranchAddress=deliveryBranch.BranchAddress,
                             deliveryBranchPhone=deliveryBranch.BranchPhone,
-                            courier.CourierName
+                            courier.CourierName,
+                            requisition.AccFlag
                         };
 
             // Step 3: Execute and load in memory
@@ -269,6 +270,17 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Fdr100 = CalculateQtyFast(g, "FDR", 100),
                     Mtdr25 = CalculateQtyFast(g, "MTDR", 25),
                     Mtdr50 = CalculateQtyFast(g, "MTDR", 50),
+                    Conv5 = CalculateQtyFast(g, null, 5, "CONV"),
+                    Conv10 = CalculateQtyFast(g, null, 10, "CONV"),
+                    Conv20 = CalculateQtyFast(g, null, 20, "CONV"),
+                    Conv50 = CalculateQtyFast(g, null, 50, "CONV"),
+                    Islm5 = CalculateQtyFast(g, null, 5,"Islamic"),
+                    Islm10 = CalculateQtyFast(g, null, 10, "Islamic"),
+                    Islm20 = CalculateQtyFast(g, null, 20, "Islamic"),
+                    Islm50 = CalculateQtyFast(g, null, 50, "Islamic"),
+                    Prio10 = CalculateQtyFast(g, null, 10, "Priority"),
+                    Prio20 = CalculateQtyFast(g, null, 20, "Priority"),
+                    Prio50 = CalculateQtyFast(g, null, 50, "Priority"),
 
                     Total = g.Sum(x => x.BookQty)
                 });
@@ -382,14 +394,14 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     RequestDate = g.First().RequestDate,
 
                     // Use optimized calculation methods
-                    Csbcd5Books = CalculateQtyFast(g, "", 5,"General"),
-                    Csbcd5Leaves = CalculateLeavesFast(g, "", 5,"General"),
-                    Csbcd10Books = CalculateQtyFast(g, "", 10,"General"),
-                    Csbcd10Leaves = CalculateLeavesFast(g, "", 10,"General"),
-                    Csbcd20Books = CalculateQtyFast(g, "", 20,"General"),
-                    Csbcd20Leaves = CalculateLeavesFast(g, "", 20,"General"),
-                    Csbcd50Books = CalculateQtyFast(g, "", 50,"General"),
-                    Csbcd50Leaves = CalculateLeavesFast(g, "", 50,"General"),
+                    Csbcd5Books = CalculateQtyFast(g, "", 5,"CONV"),
+                    Csbcd5Leaves = CalculateLeavesFast(g, "", 5,"CONV"),
+                    Csbcd10Books = CalculateQtyFast(g, "", 10,"CONV"),
+                    Csbcd10Leaves = CalculateLeavesFast(g, "", 10,"CONV"),
+                    Csbcd20Books = CalculateQtyFast(g, "", 20,"CONV"),
+                    Csbcd20Leaves = CalculateLeavesFast(g, "", 20,"CONV"),
+                    Csbcd50Books = CalculateQtyFast(g, "", 50,"CONV"),
+                    Csbcd50Leaves = CalculateLeavesFast(g, "", 50,"CONV"),
                     Isbcd5Books= CalculateQtyFast(g, "", 5, "Islamic"),
                     Isbcd5Leaves = CalculateLeavesFast(g, "", 5, "Islamic"),
                     Isbcd10Books = CalculateQtyFast(g, "", 10, "Islamic"),
@@ -398,14 +410,14 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Isbcd20Leaves = CalculateLeavesFast(g, "", 20, "Islamic"),
                     Isbcd50Books = CalculateQtyFast(g, "", 50, "Islamic"),
                     Isbcd50Leaves = CalculateLeavesFast(g, "", 50, "Islamic"),
-                    Psbcd5Books = CalculateQtyFast(g, "", 5, "Prority"),
-                    Psbcd5Leaves = CalculateLeavesFast(g, "", 5, "Prority"),
-                    Psbcd10Books = CalculateQtyFast(g, "", 10, "Prority"),
-                    Psbcd10Leaves = CalculateLeavesFast(g, "", 10, "Prority"),
-                    Psbcd20Books = CalculateQtyFast(g, "", 20, "Prority"),
-                    Psbcd20Leaves = CalculateLeavesFast(g, "", 20, "Prority"),
-                    Psbcd50Books = CalculateQtyFast(g, "", 50, "Prority"),
-                    Psbcd50Leaves = CalculateLeavesFast(g, "", 50, "Prority"),
+                    Psbcd5Books = CalculateQtyFast(g, "", 5, "Priority"),
+                    Psbcd5Leaves = CalculateLeavesFast(g, "", 5, "Priority"),
+                    Psbcd10Books = CalculateQtyFast(g, "", 10, "Priority"),
+                    Psbcd10Leaves = CalculateLeavesFast(g, "", 10, "Priority"),
+                    Psbcd20Books = CalculateQtyFast(g, "", 20, "Priority"),
+                    Psbcd20Leaves = CalculateLeavesFast(g, "", 20, "Priority"),
+                    Psbcd50Books = CalculateQtyFast(g, "", 50, "Priority"),
+                    Psbcd50Leaves = CalculateLeavesFast(g, "", 50, "Priority"),
                     Sb10Books = CalculateQtyFast(g, "Savings", 10),
                     Sb10Leaves = CalculateLeavesFast(g, "Savings", 10),
                     Sb20Books = CalculateQtyFast(g, "Savings", 20),
@@ -497,9 +509,12 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                 .Where(x => x.Leaves == leaves && x.AccFlag == accFlag)
                 .Sum(x => x.BookQty);
         }
-        return group
-            .Where(x => x.ChequeType == chequeType && x.Leaves == leaves)
-            .Sum(x => x.BookQty);
+        else
+        {
+            return group
+                .Where(x => x.ChequeType == chequeType && x.Leaves == leaves)
+                .Sum(x => x.BookQty);
+        }
     }
 
     // Optimized calculation method using Where instead of ternary in Sum

@@ -13,11 +13,11 @@ public partial class SetSerialNumber
 
     public int TrCode { get; set; }
 
+    public int? Lvs { get; set; }
+
     public string StartingNo { get; set; } = null!;
 
     public string EndingNo { get; set; } = null!;
-
-    public int? Lvs { get; set; }
 
     public string EndLimit { get; set; } = null!;
 

@@ -71,13 +71,7 @@ public partial class ChequeBookRequisition
 
     public virtual Bank Bank { get; set; } = null!;
 
-    public virtual Branch Branch { get; set; } = null!;
-
-    public virtual ICollection<ChallanDetail> ChallanDetails { get; set; } = new List<ChallanDetail>();
-
     public virtual User? CreatedByNavigation { get; set; }
-
-    public virtual Branch ReceivingBranch { get; set; } = null!;
 
     public virtual User? RequestedByNavigation { get; set; }
 

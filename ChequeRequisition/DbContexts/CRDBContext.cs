@@ -20,11 +20,7 @@ public partial class CRDBContext : DbContext
 
     public virtual DbSet<Bank> Banks { get; set; }
 
-    public virtual DbSet<BankChequeRandomSerial> BankChequeRandomSerials { get; set; }
-
     public virtual DbSet<Branch> Branches { get; set; }
-
-    public virtual DbSet<BranchesTemp> BranchesTemps { get; set; }
 
     public virtual DbSet<Challan> Challans { get; set; }
 
@@ -43,6 +39,8 @@ public partial class CRDBContext : DbContext
     public virtual DbSet<LocalFileImport> LocalFileImports { get; set; }
 
     public virtual DbSet<Menu> Menus { get; set; }
+
+    public virtual DbSet<MmblBranch> MmblBranches { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -66,7 +64,7 @@ public partial class CRDBContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=ChequeBookRe;User Id=sa;Password=alamin1252;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;Trusted_Connection=False;");
+        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=ChequeBookReLocal;User Id=sa;Password=alamin1252;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;Trusted_Connection=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -95,6 +93,8 @@ public partial class CRDBContext : DbContext
         modelBuilder.Entity<Bank>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Banks__3214EC07328B1456");
+
+            entity.HasIndex(e => e.Id, "IX_Banks_Id");
 
             entity.Property(e => e.BankAddress)
                 .HasMaxLength(255)
@@ -127,18 +127,11 @@ public partial class CRDBContext : DbContext
                 .HasConstraintName("FK_Banks_Vendors");
         });
 
-        modelBuilder.Entity<BankChequeRandomSerial>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__BankCheq__3214EC0722F9AA8B");
-
-            entity.Property(e => e.ChequeSerial).HasMaxLength(10);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
-            entity.Property(e => e.GeneratedNumber).HasMaxLength(10);
-        });
-
         modelBuilder.Entity<Branch>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Branches__3214EC07F3622F4C");
+
+            entity.HasIndex(e => e.Id, "IX_Branches_Id");
 
             entity.Property(e => e.BranchAddress)
                 .HasMaxLength(255)
@@ -174,23 +167,11 @@ public partial class CRDBContext : DbContext
                 .HasConstraintName("FK_Branches_Users1");
         });
 
-        modelBuilder.Entity<BranchesTemp>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToTable("branches_temp");
-
-            entity.Property(e => e.BranchAddress).HasMaxLength(200);
-            entity.Property(e => e.BranchCode).HasMaxLength(50);
-            entity.Property(e => e.BranchEmail).HasMaxLength(100);
-            entity.Property(e => e.BranchName).HasMaxLength(200);
-            entity.Property(e => e.BranchPhone).HasMaxLength(50);
-            entity.Property(e => e.Id).HasMaxLength(1);
-        });
-
         modelBuilder.Entity<Challan>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Challans__3214EC079EDF1E5A");
+
+            entity.HasIndex(e => e.Id, "IX_Challans_Id");
 
             entity.Property(e => e.ChallanNumber)
                 .HasMaxLength(50)
@@ -203,16 +184,18 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__ChallanD__3214EC0782D36941");
 
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.HasIndex(e => e.ChallanId, "IX_ChallanDetails_ChallanId");
 
-            entity.HasOne(d => d.RequisitionItem).WithMany(p => p.ChallanDetails)
-                .HasForeignKey(d => d.RequisitionItemId)
-                .HasConstraintName("FK_ChallanDetails_ChequeBookRequisitions");
+            entity.HasIndex(e => e.RequisitionItemId, "IX_ChallanDetails_RequisitionItemId");
+
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<ChequeBookRequisition>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__ChequeBo__3214EC07B77056B1");
+
+            entity.HasIndex(e => e.Id, "IX_ChequeBookRequisitions_Id");
 
             entity.Property(e => e.AccFlag)
                 .HasMaxLength(50)
@@ -260,23 +243,13 @@ public partial class CRDBContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChequeBookRequisitions_Banks");
 
-            entity.HasOne(d => d.Branch).WithMany(p => p.ChequeBookRequisitionBranches)
-                .HasForeignKey(d => d.BranchId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ChequeBookRequisitions_Branches1");
-
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ChequeBookRequisitionCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK_ChequeBookRequisitions_Users");
-
-            entity.HasOne(d => d.ReceivingBranch).WithMany(p => p.ChequeBookRequisitionReceivingBranches)
-                .HasForeignKey(d => d.ReceivingBranchId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ChequeBookRequisitions_Branches");
+                .HasConstraintName("FK_ChequeBookRequisitions_Users1");
 
             entity.HasOne(d => d.RequestedByNavigation).WithMany(p => p.ChequeBookRequisitionRequestedByNavigations)
                 .HasForeignKey(d => d.RequestedBy)
-                .HasConstraintName("FK_ChequeBookRequisitions_Users1");
+                .HasConstraintName("FK_ChequeBookRequisitions_Users");
 
             entity.HasOne(d => d.StatusNavigation).WithMany(p => p.ChequeBookRequisitions)
                 .HasForeignKey(d => d.Status)
@@ -292,7 +265,11 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Courier__3214EC07806CDF1C");
 
-            entity.Property(e => e.CourierCode).HasMaxLength(50);
+            entity.HasIndex(e => e.CourierCode, "IX_Couriers_Code");
+
+            entity.Property(e => e.CourierCode)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.CourierName).HasMaxLength(100);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -347,10 +324,12 @@ public partial class CRDBContext : DbContext
 
         modelBuilder.Entity<LocalFileImport>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__LocalFil__3213E83F2826DC1D");
+            entity.HasKey(e => e.Id).HasName("PK__LocalFil__3213E83F36C8C990");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
             entity.Property(e => e.FileName)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -377,6 +356,20 @@ public partial class CRDBContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<MmblBranch>(entity =>
+        {
+            entity.HasNoKey();
+
+            entity.Property(e => e.BranchAddress).HasMaxLength(50);
+            entity.Property(e => e.BranchCode).HasMaxLength(50);
+            entity.Property(e => e.BranchEmail)
+                .HasMaxLength(50)
+                .HasColumnName("branchEmail");
+            entity.Property(e => e.BranchName).HasMaxLength(50);
+            entity.Property(e => e.Id).HasMaxLength(1);
+            entity.Property(e => e.RoutingNo).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -584,6 +577,8 @@ public partial class CRDBContext : DbContext
         modelBuilder.Entity<Vendor>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Vendors__3214EC07AD3B344F");
+
+            entity.HasIndex(e => e.Id, "IX_Vendors_Id");
 
             entity.HasIndex(e => e.Email, "UQ__Vendors__A9D105344F1A9AE1").IsUnique();
 

@@ -44,6 +44,17 @@ public class SummaryReportDto
     public  int? Fdr50 { get; set; }
     public  int? Mtdr25 { get; set; }
     public  int? Mtdr50 { get; set; }
+    public int? Conv5 { get; set; }
+    public int? Conv10 { get; set; }
+    public int? Conv20 { get; set; }
+    public int? Conv50 { get; set; }
+    public int? Islm5 { get; set; }
+    public int? Islm10 { get; set; }
+    public int? Islm20 { get; set; }
+    public int? Islm50 { get; set; }
+    public int? Prio10 { get; set; }
+    public int? Prio20 { get; set; }
+    public int? Prio50 { get; set; }
     public  int? Total { get; set; }
     public string? CourierName { get; set; } = null;
     public DateOnly? RequestDate { get; set; } = null;
