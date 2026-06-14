@@ -15,10 +15,11 @@ public class GetAllByExportEndpoint : ICarterModule
             string? requestDate,
             string? search,
             bool? isAgent,
+            string? courierCode,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            var result = await sender.Send(new GetAllByExportQuery(bankId, branchId, severity, requestDate, search,isAgent), cancellationToken);
+            var result = await sender.Send(new GetAllByExportQuery(bankId, branchId, severity, requestDate, search,isAgent,courierCode), cancellationToken);
             var response = result.Adapt<GetAllByExportResult>();
             return Results.Ok(response);
         })

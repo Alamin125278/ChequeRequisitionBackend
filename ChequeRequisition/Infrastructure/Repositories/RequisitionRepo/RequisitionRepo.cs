@@ -70,7 +70,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.RequisitionRepo
 int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
 DateOnly? RequestDate, bool? IsAgent = null,
 int Skip = 0, int Limit = 10,
-string? Search = null,
+string? Search = null,string? CourierCode = null,
 CancellationToken cancellationToken = default)
         {
             // 1️⃣ মূল query তৈরি
@@ -84,6 +84,7 @@ CancellationToken cancellationToken = default)
                             && (Severity == null || r.Serverity == Severity)
                             && (RequestDate == null || r.RequestDate == RequestDate)
                             && (IsAgent == null || r.IsAgent == IsAgent)
+                            && (string.IsNullOrEmpty(CourierCode) || r.CourierCode==CourierCode)
                             && (string.IsNullOrEmpty(Search)
                                 || (r.AccountNo != null && r.AccountNo.Contains(Search))
                                 || r.AccountName.Contains(Search)
@@ -174,7 +175,7 @@ CancellationToken cancellationToken = default)
         public async Task<IEnumerable<RequisitionDto>> GetAllAsync(
      int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
      DateOnly? RequestDate,
-     string? Search = null, bool? IsAgent = null,
+     string? Search = null, bool? IsAgent = null, string? CourierCode = null,
      CancellationToken cancellationToken = default)
         {
             // 1️⃣ মূল query তৈরি
@@ -188,6 +189,7 @@ CancellationToken cancellationToken = default)
                             && (Severity == null || r.Serverity == Severity)
                             && (RequestDate == null || r.RequestDate == RequestDate)
                             && (IsAgent == null || r.IsAgent == IsAgent)
+                            && (string.IsNullOrEmpty(CourierCode) || r.CourierCode == CourierCode)
                             && (string.IsNullOrEmpty(Search)
                                 || (r.AccountNo != null && r.AccountNo.Contains(Search))
                                 || r.AccountName.Contains(Search)
@@ -281,7 +283,7 @@ CancellationToken cancellationToken = default)
 
         public async Task<int> GetAllCountAsync(
       int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity,
-      DateOnly? RequestDate, string? Search, bool? IsAgent = null, CancellationToken cancellationToken = default)
+      DateOnly? RequestDate, string? Search, bool? IsAgent = null, string? CourierCode = null, CancellationToken cancellationToken = default)
         {
             List<int> requisitionIdsFromChallan = new();
 
@@ -310,7 +312,8 @@ CancellationToken cancellationToken = default)
                 .Where(x => !Severity.HasValue || x.Serverity == Severity)
                 .Where(x => !RequestDate.HasValue || x.RequestDate == RequestDate)
                 .Where(x => IsAgent == null || x.IsAgent == IsAgent)
-                .Where(x => !VendorId.HasValue || x.VendorId == VendorId);
+                .Where(x => !VendorId.HasValue || x.VendorId == VendorId)
+                .Where(x => string.IsNullOrEmpty(CourierCode) || x.CourierCode == CourierCode);
 
             return await query.CountAsync(cancellationToken);
         }

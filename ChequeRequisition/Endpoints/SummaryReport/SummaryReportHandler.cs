@@ -4,7 +4,7 @@ using ChequeRequisiontService.Core.Interfaces.Repositories;
 
 namespace ChequeRequisiontService.Endpoints.SummaryReport;
 public record GetSummaryReportQuery(int BankId,string StartDate,string EndDate,int Severity,bool AgentType) :IQuery<GetSummaryReportRes>;
-public record GetSummaryReportRes(IEnumerable<SummaryReportDto> SummaryReports);
+public record GetSummaryReportRes(IEnumerable<BranchWiseBillDto> SummaryReports);
 public class CourierSummaryReportHandler(ISummaryReport summaryReport): IQueryHandler<GetSummaryReportQuery, GetSummaryReportRes>
 {
     public async Task<GetSummaryReportRes> Handle(GetSummaryReportQuery request, CancellationToken cancellationToken)

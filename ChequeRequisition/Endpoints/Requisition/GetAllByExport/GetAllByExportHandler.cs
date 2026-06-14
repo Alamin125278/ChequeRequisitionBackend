@@ -10,7 +10,8 @@ public record  GetAllByExportQuery(
     int? Severity = null,
     string? RequestDate = null,
     string? Search = null,
-    bool? IsAgent=null
+    bool? IsAgent=null,
+    string? CourierCode = null
 ) : IQuery<GetAllByExportResult>;
 
 public record GetAllByExportResult(
@@ -37,6 +38,7 @@ public class GetAllByExportHandler(IRequisitonRepo requisitonRepo,AuthenticatedU
             requestDate,
             request.Search,
             request.IsAgent,
+            request.CourierCode,
             cancellationToken
         );
         return new GetAllByExportResult(requisitions);

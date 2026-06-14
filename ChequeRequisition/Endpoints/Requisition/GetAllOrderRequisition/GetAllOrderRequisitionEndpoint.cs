@@ -18,9 +18,9 @@ public class GetAllOrderRequisitionEndpoint:ICarterModule
     bool ? isAgent,
     int ? skip,
     int? limit ,
-    string? search, ISender sender, CancellationToken cancellationToken) =>
+    string? search,string? courierCode, ISender sender, CancellationToken cancellationToken) =>
         {
-            var result = await sender.Send(new GetAllOrderRequisitionQuery(status,bankId,branchId,severity,requestDate,isAgent,skip ??0,limit ?? 10,search), cancellationToken);
+            var result = await sender.Send(new GetAllOrderRequisitionQuery(status,bankId,branchId,severity,requestDate,isAgent,skip ??0,limit ?? 10,search,courierCode), cancellationToken);
             var response = result.Adapt<GetAllOrderRequisitionResult>();
             return Results.Ok(response);
         })

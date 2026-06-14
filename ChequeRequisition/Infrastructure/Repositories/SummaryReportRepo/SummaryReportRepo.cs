@@ -13,7 +13,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
 {
     private CRDBContext _cRDBContext = cRDBContext;
-    public async Task<IEnumerable<SummaryReportDto>> GetSummaryReportAsync(
+    public async Task<IEnumerable<BranchWiseBillDto>> GetSummaryReportAsync(
      int bankId,
      DateOnly fromDate,
      DateOnly toDate,
@@ -35,14 +35,8 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
             var query = from requisition in baseQuery
                         join tracking in _cRDBContext.ChallanDetails.AsNoTracking()
                             on requisition.Id equals tracking.RequisitionItemId
-                        join challan in _cRDBContext.Challans.AsNoTracking()
-                            on tracking.ChallanId equals challan.Id
-                        join homeBranch in _cRDBContext.Branches.AsNoTracking()
-                            on requisition.BranchId equals homeBranch.Id
                         join deliveryBranch in _cRDBContext.Branches.AsNoTracking()
                             on requisition.ReceivingBranchId equals deliveryBranch.Id
-                        join courier in _cRDBContext.Couriers.AsNoTracking()
-                            on requisition.CourierCode equals courier.CourierCode
                         select new
                         {
                             requisition.Id,
@@ -52,13 +46,8 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             requisition.BookQty,
                             requisition.RequestDate,
                             requisition.IsAgent,
-                            challan.ChallanNumber,
-                            challan.ChallanDate,
-                            HomeBranchName = homeBranch.BranchName,
+                            requisition.AccFlag,
                             DeliveryBranchName = deliveryBranch.BranchName,
-                            deliveryBranchAddress = deliveryBranch.BranchAddress,
-                            deliveryBranchPhone = deliveryBranch.BranchPhone,
-                            courier.CourierName
                         };
 
             // Step 3: Execute query and do grouping in memory for better performance
@@ -68,25 +57,14 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
             var groupedData = rawData
                 .GroupBy(x => new
                 {
-                    x.ChallanNumber,
-                    x.ChallanDate,
-                    x.HomeBranchName,
                     x.DeliveryBranchName,
                     x.IsAgent
                 })
-                .OrderBy(g => g.Key.ChallanNumber)
-                .Select(g => new SummaryReportDto
+                .Select(g => new BranchWiseBillDto
                 {
-                    HomeBranch = g.Key.HomeBranchName,
                     BankId = g.First().BankId,
                     DeliveryBranch = g.Key.DeliveryBranchName,
-                    ChallanNo = g.Key.ChallanNumber,
-                    ChallanDate = (DateOnly)g.Key.ChallanDate,
                     IsAgent = g.Key.IsAgent??false,
-                    CourierName = g.First().CourierName,
-                    RequestDate = g.First().RequestDate,
-                    BranchAddress = g.First().deliveryBranchAddress,
-                    BranchPhone = g.First().deliveryBranchPhone,
 
                     // Use optimized calculation methods
                     Sb5 = CalculateQtyFast(g, "Savings", 5),
@@ -130,8 +108,20 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Fdr100 = CalculateQtyFast(g, "FDR", 100),
                     Mtdr25 = CalculateQtyFast(g, "MTDR", 25),
                     Mtdr50 = CalculateQtyFast(g, "MTDR", 50),
+                    Conv5 = CalculateQtyFast(g, null, 5, "CONV"),
+                    Conv10 = CalculateQtyFast(g, null, 10, "CONV"),
+                    Conv20 = CalculateQtyFast(g, null, 20, "CONV"),
+                    Conv50 = CalculateQtyFast(g, null, 50, "CONV"),
+                    Islm5 = CalculateQtyFast(g, null, 5, "Islamic"),
+                    Islm10 = CalculateQtyFast(g, null, 10, "Islamic"),
+                    Islm20 = CalculateQtyFast(g, null, 20, "Islamic"),
+                    Islm50 = CalculateQtyFast(g, null, 50, "Islamic"),
+                    Prio10 = CalculateQtyFast(g, null, 10, "Priority"),
+                    Prio20 = CalculateQtyFast(g, null, 20, "Priority"),
+                    Prio50 = CalculateQtyFast(g, null, 50, "Priority"),
 
-                    Total = g.Sum(x => x.BookQty)
+                    Total = g.Sum(x => x.BookQty),
+                    TotalLeaves = g.Sum(x => x.BookQty * x.Leaves),
                 });
 
             return groupedData.ToList();

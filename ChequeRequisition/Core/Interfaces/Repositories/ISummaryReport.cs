@@ -4,7 +4,7 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories
 {
     public interface ISummaryReport
     {
-        Task<IEnumerable<SummaryReportDto>> GetSummaryReportAsync(
+        Task<IEnumerable<BranchWiseBillDto>> GetSummaryReportAsync(
             int BankId,
             DateOnly fromDate, 
             DateOnly toDate,int Severity,bool AgentType,CancellationToken cancellationToken=default);

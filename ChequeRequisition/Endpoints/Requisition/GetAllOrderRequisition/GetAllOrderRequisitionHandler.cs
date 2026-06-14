@@ -13,8 +13,9 @@ public record GetAllOrderRequisitionQuery(
     bool? IsAgent = null,
     int Skip = 0,
     int Limit = 10,
-    string? Search = null
-):IQuery<GetAllOrderRequisitionResult>;
+    string? Search = null,
+    string? CourierCode = null
+) :IQuery<GetAllOrderRequisitionResult>;
 
 public record GetAllOrderRequisitionResult(
     IEnumerable<RequisitionDto> Requisitions,
@@ -50,9 +51,8 @@ public class GetAllOrderRequisitionHandler(
         {
             branchId = request.BranchId;
         }
-        Console.WriteLine($"IsAgent from request: {request.IsAgent}");
 
-            var requisitions = await requisitionRepo.GetAllAsync(request.Status, bankId, branchId, authenticatedUserInfo.VendorId, request.Severity, requestDate,request.IsAgent, request.Skip, request.Limit, request.Search, cancellationToken);
+            var requisitions = await requisitionRepo.GetAllAsync(request.Status, bankId, branchId, authenticatedUserInfo.VendorId, request.Severity, requestDate,request.IsAgent, request.Skip, request.Limit, request.Search,request.CourierCode, cancellationToken);
         var totalCount = await requisitionRepo.GetAllCountAsync(
             request.Status,
             bankId,
@@ -62,6 +62,7 @@ public class GetAllOrderRequisitionHandler(
             requestDate,
             request.Search,
             request.IsAgent,
+            request.CourierCode,
             cancellationToken
         );
         return new GetAllOrderRequisitionResult(requisitions, totalCount);

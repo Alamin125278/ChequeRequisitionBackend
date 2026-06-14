@@ -6,9 +6,9 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories
 {
     public interface IRequisitonRepo:IGenericRepository<RequisitionDto>
     {
-        Task<IEnumerable<RequisitionDto>> GetAllAsync(int? Status,int? BankId, int? BranchId, int? VendorId, int? Severity, DateOnly? RequestDate, bool? IsAgent = null, int Skip = 0, int Limit = 10, string? Search = null, CancellationToken cancellationToken = default);
-        Task<IEnumerable<RequisitionDto>> GetAllAsync(int? Status,int? BankId, int? BranchId,int? VendorId, int? Severity, DateOnly? RequestDate, string? Search = null,bool? IsAgent=null, CancellationToken cancellationToken = default);
-        Task<int> GetAllCountAsync(int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity, DateOnly? RequestDate, string? Search, bool? IsAgent = null, CancellationToken cancellationToken = default);
+        Task<IEnumerable<RequisitionDto>> GetAllAsync(int? Status,int? BankId, int? BranchId, int? VendorId, int? Severity, DateOnly? RequestDate, bool? IsAgent = null, int Skip = 0, int Limit = 10, string? Search = null, string? CourierCode = null, CancellationToken cancellationToken = default);
+        Task<IEnumerable<RequisitionDto>> GetAllAsync(int? Status,int? BankId, int? BranchId,int? VendorId, int? Severity, DateOnly? RequestDate, string? Search = null,bool? IsAgent=null,string? CourierCode=null, CancellationToken cancellationToken = default);
+        Task<int> GetAllCountAsync(int? Status, int? BankId, int? BranchId, int? VendorId, int? Severity, DateOnly? RequestDate, string? Search, bool? IsAgent = null, string? CourierCode = null, CancellationToken cancellationToken = default);
         Task<int> UpdateChequeListAsync(List<int> Items,int Severity,int UserId, CancellationToken cancellationToken);
         Task<int> UpdateRequisitionSeverityAsync(List<int> Items,int Status,int UserId, CancellationToken cancellationToken);
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
