@@ -36,6 +36,12 @@ namespace ChequeRequisiontService.Core.Dto.Requisition
 
         public required string AccFlag { get; set; }
 
+        public string? DistId { get; set; }
+        public string? QrId { get; set; }
+        public string? SecurityCode { get; set; }
+        public string? TokenText { get; set; }
+        public string? CoverText { get; set; }
+
         public required int Status { get; set; } // Assuming 1 is the default status for a new requisition
         public bool IsDeleted { get; set; } = false;
 

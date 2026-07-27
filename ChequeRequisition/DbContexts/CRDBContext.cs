@@ -64,7 +64,7 @@ public partial class CRDBContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=ChequeBookReLocal;User Id=sa;Password=alamin1252;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;Trusted_Connection=False;");
+        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=ChequeBookRe;User Id=sa;Password=alamin1252;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;Trusted_Connection=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -93,8 +93,6 @@ public partial class CRDBContext : DbContext
         modelBuilder.Entity<Bank>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Banks__3214EC07328B1456");
-
-            entity.HasIndex(e => e.Id, "IX_Banks_Id");
 
             entity.Property(e => e.BankAddress)
                 .HasMaxLength(255)
@@ -130,8 +128,6 @@ public partial class CRDBContext : DbContext
         modelBuilder.Entity<Branch>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Branches__3214EC07F3622F4C");
-
-            entity.HasIndex(e => e.Id, "IX_Branches_Id");
 
             entity.Property(e => e.BranchAddress)
                 .HasMaxLength(255)
@@ -171,8 +167,6 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Challans__3214EC079EDF1E5A");
 
-            entity.HasIndex(e => e.Id, "IX_Challans_Id");
-
             entity.Property(e => e.ChallanNumber)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -184,18 +178,12 @@ public partial class CRDBContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__ChallanD__3214EC0782D36941");
 
-            entity.HasIndex(e => e.ChallanId, "IX_ChallanDetails_ChallanId");
-
-            entity.HasIndex(e => e.RequisitionItemId, "IX_ChallanDetails_RequisitionItemId");
-
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<ChequeBookRequisition>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__ChequeBo__3214EC07B77056B1");
-
-            entity.HasIndex(e => e.Id, "IX_ChequeBookRequisitions_Id");
 
             entity.Property(e => e.AccFlag)
                 .HasMaxLength(50)
@@ -218,14 +206,23 @@ public partial class CRDBContext : DbContext
             entity.Property(e => e.CourierCode)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.CoverText)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CusAddress).HasColumnType("text");
+            entity.Property(e => e.DistId)
+                .HasMaxLength(10)
+                .IsFixedLength();
             entity.Property(e => e.EndNo)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.MicrNo)
                 .HasMaxLength(13)
                 .IsUnicode(false);
+            entity.Property(e => e.QrId)
+                .HasMaxLength(10)
+                .IsFixedLength();
             entity.Property(e => e.Remarks).HasColumnType("text");
             entity.Property(e => e.RoutingNo)
                 .HasMaxLength(10)
@@ -234,6 +231,9 @@ public partial class CRDBContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.StartNo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.TokenText)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
@@ -264,8 +264,6 @@ public partial class CRDBContext : DbContext
         modelBuilder.Entity<Courier>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Courier__3214EC07806CDF1C");
-
-            entity.HasIndex(e => e.CourierCode, "IX_Couriers_Code");
 
             entity.Property(e => e.CourierCode)
                 .HasMaxLength(50)
@@ -577,8 +575,6 @@ public partial class CRDBContext : DbContext
         modelBuilder.Entity<Vendor>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Vendors__3214EC07AD3B344F");
-
-            entity.HasIndex(e => e.Id, "IX_Vendors_Id");
 
             entity.HasIndex(e => e.Email, "UQ__Vendors__A9D105344F1A9AE1").IsUnique();
 

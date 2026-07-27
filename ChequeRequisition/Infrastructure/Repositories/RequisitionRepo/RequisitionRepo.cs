@@ -164,7 +164,12 @@ CancellationToken cancellationToken = default)
                         StatusName = e.s?.StatusName,
                         RequestName = e.u?.Name,
                         ReceivingBranchName = e.rbrc?.BranchName,
-                        ReceivingBranchCode = e.rbrc?.BranchCode
+                        ReceivingBranchCode = e.rbrc?.BranchCode,
+                        //DistId=e.r.DistId,
+                        QrId = e.r.QrId,
+                        SecurityCode = e.r.SecurityCode,
+                        TokenText = e.r.TokenText,
+                        CoverText = e.r.CoverText
                     };
                 })
                 .ToList();
@@ -267,7 +272,12 @@ CancellationToken cancellationToken = default)
                         StatusName = e.s?.StatusName,
                         RequestName = e.u?.Name,
                         ReceivingBranchName = e.rbrc?.BranchName,
-                        ReceivingBranchCode = e.rbrc?.BranchCode
+                        ReceivingBranchCode = e.rbrc?.BranchCode,
+                        //DistId=e.r.DistId,
+                        QrId=e.r.QrId,
+                        SecurityCode=e.r.SecurityCode,
+                        TokenText=e.r.TokenText,
+                        CoverText=e.r.CoverText
                     };
                 })
                 .ToList();

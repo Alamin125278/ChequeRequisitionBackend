@@ -4,6 +4,7 @@ using ChequeRequisiontService.DbContexts;
 using ChequeRequisiontService.Endpoints.SummaryReport.ConsumptionReport;
 using ChequeRequisiontService.Models.CRDB;
 using DocumentFormat.OpenXml.Spreadsheet;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 
@@ -18,7 +19,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
      DateOnly fromDate,
      DateOnly toDate,
      int severity,
-     bool agentType,
+     bool? agentType,
      CancellationToken cancellationToken = default)
     {
         try
@@ -26,10 +27,14 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
             // Step 1: Use IQueryable and apply all filters at database level
             var baseQuery = _cRDBContext.ChequeBookRequisitions
                 .AsNoTracking()
-                .Where(r => r.IsAgent == agentType &&
+                .Where(r =>
                            r.BankId == bankId &&
                            r.RequestDate >= fromDate &&
                            r.RequestDate <= toDate);
+            if (agentType.HasValue)
+            {
+                baseQuery = baseQuery.Where(r => r.IsAgent == agentType.Value);
+            }
 
             // Step 2: Single optimized query with proper indexing hints
             var query = from requisition in baseQuery
@@ -47,6 +52,7 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                             requisition.RequestDate,
                             requisition.IsAgent,
                             requisition.AccFlag,
+                            requisition.DistId,
                             DeliveryBranchName = deliveryBranch.BranchName,
                         };
 
@@ -58,13 +64,15 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                 .GroupBy(x => new
                 {
                     x.DeliveryBranchName,
-                    x.IsAgent
+                    x.IsAgent,
+                    x.DistId
                 })
                 .Select(g => new BranchWiseBillDto
                 {
                     BankId = g.First().BankId,
                     DeliveryBranch = g.Key.DeliveryBranchName,
                     IsAgent = g.Key.IsAgent??false,
+                    DistId = g.Key.DistId,
 
                     // Use optimized calculation methods
                     Sb5 = CalculateQtyFast(g, "Savings", 5),
@@ -88,6 +96,8 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
                     Sba10 = CalculateQtyFast(g, "SBA", 10),
                     Msd10 = CalculateQtyFast(g, "MSD", 10),
+                    Msa10 = CalculateQtyFast(g, "MSA", 10),
+                    Msa20 = CalculateQtyFast(g, "MSA", 20),
                     Msd50 = CalculateQtyFast(g, "MSD", 50),
 
                     Cda25 = CalculateQtyFast(g, "CDA", 25),
@@ -95,6 +105,11 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Acd50 = CalculateQtyFast(g, "ACD", 50),
                     Acd100 = CalculateQtyFast(g, "ACD", 100),
                     Awcd25 = CalculateQtyFast(g, "AWCD", 25),
+                    Awca20 = CalculateQtyFast(g, "AWCA", 20),
+                    Awca50 = CalculateQtyFast(g, "AWCA", 50),
+                    Awca100 = CalculateQtyFast(g, "AWCA", 100),
+                    Msna50 = CalculateQtyFast(g, "MSNA", 50),
+                    Msna100 = CalculateQtyFast(g, "MSNA", 100),
                     Sna25 = CalculateQtyFast(g, "SNA", 25),
                     Snd25 = CalculateQtyFast(g, "SND", 25),
                     Snd50 = CalculateQtyFast(g, "SND", 50),
@@ -240,6 +255,8 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
                     Sba10 = CalculateQtyFast(g, "SBA", 10),
                     Msd10 = CalculateQtyFast(g, "MSD", 10),
+                    Msa10 = CalculateQtyFast(g, "MSA", 10),
+                    Msa20 = CalculateQtyFast(g, "MSA", 20),
                     Msd50 = CalculateQtyFast(g, "MSD", 50),
 
                     Cda25 = CalculateQtyFast(g, "CDA", 25),
@@ -247,6 +264,11 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Acd50 = CalculateQtyFast(g, "ACD", 50),
                     Acd100 = CalculateQtyFast(g, "ACD", 100),
                     Awcd25 = CalculateQtyFast(g, "AWCD", 25),
+                    Awca20 = CalculateQtyFast(g, "AWCA", 20),
+                    Awca50 = CalculateQtyFast(g, "AWCA", 50),
+                    Awca100 = CalculateQtyFast(g, "AWCA", 100),
+                    Msna50 = CalculateQtyFast(g, "MSNA", 50),
+                    Msna100 = CalculateQtyFast(g, "MSNA", 100),
                     Sna25 = CalculateQtyFast(g, "SNA", 25),
                     Snd25 = CalculateQtyFast(g, "SND", 25),
                     Snd50 = CalculateQtyFast(g, "SND", 50),
@@ -280,6 +302,107 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
         catch (DbException ex)
         {
             throw new Exception("Database update error: " + (ex.InnerException?.Message ?? ex.Message), ex);
+        }
+    }
+
+    public async Task<IEnumerable<AgentSummaryReportDto>> GetAgentSummaryReportAsync(int BankId, DateOnly RequestDate, bool? AgentType, string? Courier, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var baseQuery = _cRDBContext.ChequeBookRequisitions
+                .AsNoTracking()
+                .Where(r => r.RequestDate == RequestDate &&
+                            r.BankId == BankId);
+
+            if (!string.IsNullOrEmpty(Courier))
+            {
+                baseQuery = baseQuery.Where(r => r.CourierCode == Courier);
+            }
+
+            if (AgentType.HasValue)
+            {
+                baseQuery = baseQuery.Where(r => r.IsAgent == AgentType.Value);
+            }
+
+            var rawData = await (
+                from requisition in baseQuery
+                join deliveryBranch in _cRDBContext.Branches.AsNoTracking()
+                    on requisition.ReceivingBranchId equals deliveryBranch.Id
+                join courier in _cRDBContext.Couriers.AsNoTracking()
+                        on requisition.CourierCode equals courier.CourierCode
+                select new
+                {
+                    requisition.BankId,
+                    requisition.ChequeType,
+                    requisition.Leaves,
+                    requisition.BookQty,
+                    requisition.RequestDate,
+                    requisition.DistId,
+                    requisition.ReceivingBranchId,
+                    DeliveryBranchName = deliveryBranch.BranchName,
+                    courier.CourierName
+                })
+                .ToListAsync(cancellationToken);
+
+            if (AgentType == true)
+            {
+                return rawData
+                    .GroupBy(x => new { x.DistId, x.ReceivingBranchId })
+                    .Select(g =>
+                    {
+                        var first = g.First();
+
+                        return new AgentSummaryReportDto
+                        {
+                            DeliveryBranch = first.DeliveryBranchName,
+                            CourierName = g.First().CourierName,
+                            BankId = first.BankId,
+                            RequestDate = first.RequestDate,
+                            DistId = first.DistId,
+
+
+                            Msa10 = CalculateQtyFast(g, "MSA", 10),
+                            Msa20 = CalculateQtyFast(g, "MSA", 20),
+                            Awca20 = CalculateQtyFast(g, "AWCA", 20),
+                            Awca50 = CalculateQtyFast(g, "AWCA", 50),
+                            Awca100 = CalculateQtyFast(g, "AWCA", 100),
+                            Po50 = CalculateQtyFast(g, "PO", 50),
+                            Total = g.Sum(x => x.BookQty)
+                        };
+                    })
+                    .ToList();
+            }
+
+            return rawData
+                .GroupBy(x => x.ReceivingBranchId)
+                .Select(g =>
+                {
+                    var first = g.First();
+
+                    return new AgentSummaryReportDto
+                    {
+                        DeliveryBranch = first.DeliveryBranchName,
+                        CourierName = g.First().CourierName,
+                        BankId = first.BankId,
+                        RequestDate = first.RequestDate,
+                        DistId = string.Empty,
+
+                        Msa10 = CalculateQtyFast(g, "MSA", 10),
+                        Msa20 = CalculateQtyFast(g, "MSA", 20),
+                        Awca20 = CalculateQtyFast(g, "AWCA", 20),
+                        Awca50 = CalculateQtyFast(g, "AWCA", 50),
+                        Awca100 = CalculateQtyFast(g, "AWCA", 100),
+                        Po50 = CalculateQtyFast(g, "PO", 50),
+                        Total = g.Sum(x => x.BookQty)
+                    };
+                })
+                .ToList();
+        }
+        catch (DbException ex)
+        {
+            throw new Exception(
+                "Database update error: " + (ex.InnerException?.Message ?? ex.Message),
+                ex);
         }
     }
 
@@ -343,6 +466,76 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
         {
             throw new Exception(
                 $"Database error while generating summary report: {ex.InnerException?.Message ?? ex.Message}", ex);
+        }
+    }
+    public async Task<IEnumerable<AgentReceiptDto>> GetAgentReceiptReportAsync(int BankId, DateOnly RequestDate, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Step 1: Filter by date safely (nullable DateTime)
+            var baseQuery = _cRDBContext.ChequeBookRequisitions
+                .AsNoTracking()
+                .Where(r=>r.BankId==BankId && r.RequestDate==RequestDate&& r.DistId !="");
+
+            // Step 2: Join with Banks table
+            var query = from r in baseQuery
+                        join bank in _cRDBContext.Banks.AsNoTracking()
+                            on r.BankId equals bank.Id
+                        join rbrc in _cRDBContext.Branches on r.ReceivingBranchId equals rbrc.Id into rrbr
+                        from rbrc in rrbr.DefaultIfEmpty()
+                        join d in _cRDBContext.ChallanDetails on r.Id equals d.RequisitionItemId into rd
+                        from d in rd.DefaultIfEmpty()
+                        join c in _cRDBContext.Challans on d.ChallanId equals c.Id into rc
+                        from c in rc.DefaultIfEmpty()
+                        select new
+                        {
+                            r.Id,
+                            r.BankId,
+                            r.AccountName,
+                            r.AccountNo,
+                            r.StartNo,
+                            r.EndNo,
+                            r.RequestDate,
+                            r.ChequeType,
+                            r.Leaves,
+                            r.BookQty,
+                            r.DistId,
+                            r.ReceivingBranchId,
+                            DeliveryBranch = rbrc.BranchName,
+                            ChallanNo = c.ChallanNumber
+                        };
+
+            var rawData = await query.ToListAsync(cancellationToken);
+
+            // Step 4: Group in memory (much faster than database grouping for complex calculations)
+            var groupedData = rawData
+                .GroupBy(x => new
+                {
+                    x.ReceivingBranchId,x.DistId
+                })
+                .Select(g => new AgentReceiptDto
+                {
+                    DeliveryBranch = g.First().DeliveryBranch,
+                    DistId = g.First().DistId,
+                    ChallanNo = g.First().ChallanNo,
+                    TotalBookQty = g.Sum(x => x.BookQty),
+                    Items = g.Select(x => new ChequeBookItemDto
+                    {
+                        AccountNo = x.AccountNo,
+                        AccountName = x.AccountName,
+                        StartNo = x.StartNo,
+                        EndNo = x.EndNo,
+                        AccType = x.ChequeType,
+                        BookQty = x.BookQty,
+                        Leaves = x.Leaves,
+                    }).ToList()
+
+                });
+
+            return groupedData.ToList();
+        }catch(DbException ex)
+        {
+            throw new Exception($"Database error while generating summary report: {ex.InnerException?.Message ?? ex.Message}", ex);
         }
     }
 
@@ -425,8 +618,8 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Cd100Books = CalculateQtyFast(g, "Current", 100),
                     Cd100Leaves = CalculateLeavesFast(g, "Current", 100),
 
-                    Po50Books = CalculateQtyFast(g, "Payment Order", 50),
-                    Po50Leaves = CalculateLeavesFast(g, "Payment Order", 50),
+                    Po50Books = CalculateQtyFast(g, "PO", 50),
+                    Po50Leaves = CalculateLeavesFast(g, "PO", 50),
                     Po100Books = CalculateQtyFast(g, "Payment Order", 100),
                     Po100Leaves = CalculateLeavesFast(g, "Payment Order", 100),
 
@@ -437,6 +630,10 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
 
                     Sba10Books = CalculateQtyFast(g, "SBA", 10),
                     Sba10Leaves = CalculateLeavesFast(g, "SBA", 10),
+                    Msa10Books = CalculateQtyFast(g, "MSA", 10),
+                    Msa10Leaves = CalculateLeavesFast(g, "MSA", 10),
+                    Msa20Books = CalculateQtyFast(g, "MSA", 20),
+                    Msa20Leaves = CalculateLeavesFast(g, "MSA", 20),
                     Msd10Books = CalculateQtyFast(g, "MSD", 10),
                     Msd10Leaves = CalculateLeavesFast(g, "MSD", 10),
                     Msd50Books = CalculateQtyFast(g, "MSD", 50),
@@ -451,6 +648,12 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Acd50Leaves = CalculateLeavesFast(g, "ACD", 50),
                     Acd100Books = CalculateQtyFast(g, "ACD", 100),
                     Acd100Leaves = CalculateLeavesFast(g, "ACD", 100),
+                    Awca20Books = CalculateQtyFast(g, "AWCA", 20),
+                    Awca20Leaves = CalculateLeavesFast(g, "AWCA", 20),
+                    Awca50Books = CalculateQtyFast(g, "AWCA", 50),
+                    Awca50Leaves = CalculateLeavesFast(g, "AWCA", 50), 
+                    Awca100Books = CalculateQtyFast(g, "AWCA", 100),
+                    Awca100Leaves = CalculateLeavesFast(g, "AWCA", 100), 
                     Awcd25Books = CalculateQtyFast(g, "AWCD", 25),
                     Awcd25Leaves = CalculateLeavesFast(g, "AWCD", 25),
                     Snd25Books = CalculateQtyFast(g, "SND", 25),
@@ -463,7 +666,6 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
                     Sna25Leaves = CalculateLeavesFast(g, "SNA", 25),
                     Msnd25Books = CalculateQtyFast(g, "MSND", 25),
                     Msnd25Leaves = CalculateLeavesFast(g, "MSND", 25),
-
                     Poa50Books = CalculateQtyFast(g, "POA", 50),
                     Poa50Leaves = CalculateLeavesFast(g, "POA", 50),
                     Poi50Books = CalculateQtyFast(g, "POI", 50),
@@ -521,4 +723,5 @@ public class SummaryReportRepo(CRDBContext cRDBContext) : ISummaryReport
             .Sum(x => (int?)x.BookQty * (int?)x.Leaves);
     }
 
+  
 }

@@ -40,6 +40,10 @@ public class ConsumptionReportDto
     public int? Msd10Leaves { get; set; }
     public int? Msd50Books { get; set; }
     public int? Msd50Leaves { get; set; }
+    public int? Msa10Books { get; set; }
+    public int? Msa10Leaves { get; set; }
+    public int? Msa20Books { get; set; }
+    public int? Msa20Leaves { get; set; }
     public int? Cd10Books { get; set; }
     public int? Cd10Leaves { get; set; }
     public int? Cd25Books { get; set; }
@@ -56,6 +60,12 @@ public class ConsumptionReportDto
     public int? Acd50Leaves { get; set; }
     public int? Acd100Books { get; set; }
     public int? Acd100Leaves { get; set; }
+    public int? Awca20Books { get; set; }
+    public int? Awca20Leaves { get; set; }
+    public int? Awca50Books { get; set; }
+    public int? Awca50Leaves { get; set; }
+    public int? Awca100Books { get; set; }
+    public int? Awca100Leaves { get; set; }
     public int? Awcd25Books { get; set; }
     public int? Awcd25Leaves { get; set; }
     public int? Sna25Books { get; set; }

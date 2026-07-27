@@ -69,6 +69,16 @@ public partial class ChequeBookRequisition
 
     public DateTime? UpdatedAt { get; set; }
 
+    public string? DistId { get; set; }
+
+    public string? QrId { get; set; }
+
+    public string? SecurityCode { get; set; }
+
+    public string? TokenText { get; set; }
+
+    public string? CoverText { get; set; }
+
     public virtual Bank Bank { get; set; } = null!;
 
     public virtual User? CreatedByNavigation { get; set; }

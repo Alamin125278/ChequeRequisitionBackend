@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace ChequeRequisiontService.Endpoints.LocalFileUpload;
 
-public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,string CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum,string HomeBranchCode,string DeliveryBranchCode,Boolean IsAgent,string AccFlag) :ICommand<LocalFileUploadResult>;
+public record LocalFileUploadCommand(int BankId,string BranchName, string AccountNo,string RoutingNo,string StartNo,string EndNo,string ChequeType,string ChequePrefix,string MicrNo,string Series, string AccountName,string CusAddress,int BookQty,int TransactionCode, int Leaves,string CourierCode,string ReceivingBranchName,int Serverity,string RequestDate,string? AgentNum,string HomeBranchCode,string DeliveryBranchCode,Boolean IsAgent,string AccFlag,string? DistId,string? QrId,string? SecurityCode,string? TokenText,string? CoverText) :ICommand<LocalFileUploadResult>;
 
 public record BulkLocalFileUploadCommand(List<LocalFileUploadCommand> Items) : ICommand<LocalFileUploadResult>;
 
@@ -92,7 +92,13 @@ public class BulkLocalFileUploadHandler(
             int branchId;
             if (item.ChequeType == "Payment Order" || item.ChequeType=="FDR" || item.ChequeType == "MTDR" || item.ChequeType == "POA" || item.ChequeType == "POI" || item.BankId==8||item.BankId==6)
             {
-                 var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO",null, cancellationToken);
+                 var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "PO",item.RoutingNo, cancellationToken);
+                branchId = branch != null ? branch.Id : 0;
+                if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
+            }
+            else if (item.BankId == 9)
+            {
+                var branch = await branchRepo.GetIdAsync(item.BankId, item.BranchName, "IBBL", null, cancellationToken);
                 branchId = branch != null ? branch.Id : 0;
                 if (branchId == 0) return new LocalFileUploadResult(false, $"Branch '{item.BranchName}' not found.");
             }
@@ -129,8 +135,7 @@ public class BulkLocalFileUploadHandler(
             dto.ReceivingBranchId = receivingBranchId;
 
             requisitionDtos.Add(dto);
-        }
-
+        };
         var result = await localFileUploadRepo.BulkUploadAsync(requisitionDtos, authenticatedUserInfo.Id,authenticatedUserInfo.VendorId, cancellationToken);
 
         return result.Success

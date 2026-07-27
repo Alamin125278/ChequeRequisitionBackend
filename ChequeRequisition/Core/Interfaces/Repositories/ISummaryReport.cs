@@ -7,7 +7,7 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories
         Task<IEnumerable<BranchWiseBillDto>> GetSummaryReportAsync(
             int BankId,
             DateOnly fromDate, 
-            DateOnly toDate,int Severity,bool AgentType,CancellationToken cancellationToken=default);
+            DateOnly toDate,int Severity,bool? AgentType,CancellationToken cancellationToken=default);
         Task<IEnumerable<SummaryReportDto>> GetCourierSummaryReportAsync(
             int BankId,
             DateOnly fromDate, 
@@ -18,5 +18,12 @@ namespace ChequeRequisiontService.Core.Interfaces.Repositories
             int BankId,
             DateOnly fromDate, 
             DateOnly toDate,CancellationToken cancellationToken=default);
+
+        Task<IEnumerable<AgentReceiptDto>> GetAgentReceiptReportAsync(
+            int BankId,
+            DateOnly RequestDate, CancellationToken cancellationToken = default);
+        Task<IEnumerable<AgentSummaryReportDto>> GetAgentSummaryReportAsync(
+            int BankId,
+            DateOnly RequestDate, bool? AgentType, string? Courier, CancellationToken cancellationToken = default);
     }
 }

@@ -145,7 +145,7 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
                             : afterDash;
                     }
                 }
-                else if (branchName.Contains(','))
+                else if (branchName.Contains(',') && branchCode !="IBBL")
                 {
                     trimmedBranchName = branchName[..branchName.IndexOf(',')].Trim();
                 }
@@ -158,23 +158,23 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
                 {
                     query = query.Where(x =>
                         x.BranchName != null &&
-                        x.BranchName.StartsWith(trimmedBranchName));
+                        x.BranchName.StartsWith(trimmedBranchName) && x.RoutingNo==IsAgent);
                 }
-                else if (IsAgent == "Agent")
+                else if (branchCode == "IBBL")
                 {
                     query = query.Where(x =>
-                        x.BranchCode == branchCode &&
-                        x.BranchName!.StartsWith(trimmedBranchName));
-                }
-                else if (string.IsNullOrEmpty(branchName))
-                {
-                    query = query.Where(x => x.BranchCode == branchCode);
+                        x.BranchName == trimmedBranchName);
                 }
                 else
                 {
-                    query = query.Where(x =>
-                        x.BranchCode == branchCode &&
-                        x.BranchName!.StartsWith(trimmedBranchName));
+                    query = query.Where(x => x.BranchCode == branchCode);
+
+                    if (!string.IsNullOrEmpty(branchName) || IsAgent == "Agent")
+                    {
+                        query = query.Where(x =>
+                            x.BranchName != null &&
+                            x.BranchName.StartsWith(trimmedBranchName));
+                    }
                 }
             }
             else

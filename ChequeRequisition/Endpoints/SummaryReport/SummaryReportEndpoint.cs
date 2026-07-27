@@ -9,7 +9,7 @@ public class SummaryReportEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-       app.MapGet("/api/summary-report", async (int bankId,string startDate,string endDate,int severity,bool agentType, ISender sender, CancellationToken cancellationToken) =>
+       app.MapGet("/api/summary-report", async (int bankId,string startDate,string endDate,int severity,bool? agentType, ISender sender, CancellationToken cancellationToken) =>
        {
            try
            {
