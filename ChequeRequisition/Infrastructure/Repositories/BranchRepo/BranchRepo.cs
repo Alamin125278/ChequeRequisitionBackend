@@ -156,9 +156,18 @@ namespace ChequeRequisiontService.Infrastructure.Repositories.BranchRepo
             {
                 if (branchCode == "PO")
                 {
-                    query = query.Where(x =>
+                    if (bankId == 4)
+                    {
+                        query = query.Where(x =>
                         x.BranchName != null &&
-                        x.BranchName.StartsWith(trimmedBranchName) && x.RoutingNo==IsAgent);
+                        x.BranchName == trimmedBranchName);
+                    }
+                    else
+                    {
+                        query = query.Where(x =>
+                            x.BranchName != null &&
+                            x.BranchName.StartsWith(trimmedBranchName) && x.RoutingNo == IsAgent);
+                    }
                 }
                 else if (branchCode == "IBBL")
                 {
